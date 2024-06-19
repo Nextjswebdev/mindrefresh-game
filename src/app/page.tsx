@@ -65,7 +65,7 @@ const Game = () => {
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
       {gameState === 'start' && (
         <div className="flex flex-col items-center bg-white p-8 rounded shadow-lg">
-          <h1 className="text-3xl font-bold mb-4">Welcome to the Quiz Game</h1>
+          <h1 className="text-3xl font-bold mb-4 text-black">Welcome to the Quiz Game</h1>
           <p className="mb-4 text-center text-gray-700">Test your knowledge with fun questions and puzzles!</p>
           <button
             className="px-6 py-3 font-semibold text-white bg-black rounded hover:bg-white hover:text-black transition duration-300 ease-in-out transform hover:scale-105"
@@ -94,7 +94,7 @@ const Game = () => {
 
           {currentQuestionIndex !== null && (
             <div className="mt-4 p-4 bg-white  rounded shadow-lg transition duration-500 ease-in-out transform">
-              <p className="mb-4 text-lg ">{questions[currentQuestionIndex].content}</p>
+              <p className="mb-4 text-lg text-black">{questions[currentQuestionIndex].content}</p>
               {['mcq', 'emoji', 'english'].includes(questions[currentQuestionIndex].type) && (
                 <div className="mt-2 flex flex-col gap-2 text-black">
                   {questions[currentQuestionIndex].options?.map((option, index) => (
