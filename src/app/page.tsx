@@ -78,7 +78,7 @@ const Game = () => {
 
       {gameState === 'playing' && (
         <div className="w-full max-w-md">
-          <div className="text-2xl font-bold mb-4 text-center">Score: {score}</div>
+          <div className="text-2xl font-bold mb-4 text-center text-black">Score: {score}</div>
           <div className="grid grid-cols-3 gap-4 mb-4">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((number) => (
               <button
@@ -93,10 +93,10 @@ const Game = () => {
           </div>
 
           {currentQuestionIndex !== null && (
-            <div className="mt-4 p-4 bg-white rounded shadow-lg transition duration-500 ease-in-out transform">
-              <p className="mb-4 text-lg">{questions[currentQuestionIndex].content}</p>
+            <div className="mt-4 p-4 bg-white  rounded shadow-lg transition duration-500 ease-in-out transform">
+              <p className="mb-4 text-lg ">{questions[currentQuestionIndex].content}</p>
               {['mcq', 'emoji', 'english'].includes(questions[currentQuestionIndex].type) && (
-                <div className="mt-2 flex flex-col gap-2">
+                <div className="mt-2 flex flex-col gap-2 text-black">
                   {questions[currentQuestionIndex].options?.map((option, index) => (
                     <button
                       key={index}
@@ -147,7 +147,7 @@ const Game = () => {
         <div className="flex flex-col items-center animate-pulse">
           <p className="text-xl font-bold text-red-500 mb-4">You Lost!</p>
           <Image src="https://media.giphy.com/media/mxXPuScIwPwK2oyD6i/giphy.gif" width={256} height={256} alt="You lost gif" />
-          <p className="text-xl font-bold mt-4">Your Final Score: {score}</p>
+          <p className="text-xl font-bold mt-4 text-black">Your Final Score: {score}</p>
           <button
             className="px-6 py-3 mt-4 font-semibold text-white bg-black rounded hover:bg-white hover:text-black transition duration-300 ease-in-out transform hover:scale-105"
             onClick={startGame}
