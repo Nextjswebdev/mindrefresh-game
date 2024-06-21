@@ -1,7 +1,8 @@
-'use client';
+'use client'
 
 import React, { useState, useEffect } from 'react';
 import questionsData from '../questions.json';
+import 'animate.css'; // Import animate.css for animations
 
 interface Question {
   type: string;
@@ -28,7 +29,8 @@ const Game = () => {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [userAnswer, setUserAnswer] = useState<string>('');
   const [timer, setTimer] = useState<number>(30);
-  const [isPaused, setIsPaused] = useState<boolean>(false);
+  const [canChangeQuestion, setCanChangeQuestion] = useState<boolean>(true);
+  const [canShowHint, setCanShowHint] = useState<boolean>(true);
   const [showHint, setShowHint] = useState<boolean>(false);
   const [showValidationMessage, setShowValidationMessage] = useState<boolean>(false);
 
@@ -65,7 +67,7 @@ const Game = () => {
   }, [category]);
 
   useEffect(() => {
-    if (!isPaused && gameState === 'playing' && timer > 0) {
+    if (gameState === 'playing' && timer > 0) {
       const interval = setInterval(() => {
         setTimer((prevTimer) => prevTimer - 1);
       }, 1000);
@@ -75,13 +77,17 @@ const Game = () => {
       setGameState('lost');
       handleGameOver();
     }
-  }, [isPaused, gameState, timer]);
+  }, [gameState, timer]);
 
   const handleAnswer = (selected: string) => {
     if (gameState !== 'playing' || currentQuestionIndex === null) return;
 
     const currentQuestion = currentQuestions[currentQuestionIndex];
-    const correct = currentQuestion.answer.toLowerCase() === selected.toLowerCase();
+    const correctAnswer = currentQuestion.answer.toLowerCase().trim(); // Trim correct answer
+
+    // Trim user's answer and compare ignoring spaces
+    const userAnswerTrimmed = selected.toLowerCase().trim();
+    const correct = userAnswerTrimmed === correctAnswer;
 
     setSelectedOption(selected);
     setTimeout(() => {
@@ -119,18 +125,44 @@ const Game = () => {
       setSelectedOption(null);
       setUserAnswer('');
       setTimer(30);
+      setCanChangeQuestion(true);
+      setCanShowHint(true);
     } catch (error) {
       console.error('Error starting the game:', error);
     }
   };
 
-  const handlePauseResume = () => {
-    setIsPaused(!isPaused);
+  const handlePlayAgain = () => {
+    setGameState('start');
+    setUserName('');
+    setCategory('');
+    setScore(0);
+    setCurrentQuestionIndex(null);
+    setSelectedOption(null);
+    setUserAnswer('');
+    setTimer(30);
+    setCanChangeQuestion(true);
+    setCanShowHint(true);
+    setShowHint(false);
+  };
+
+  const handleChangeQuestion = () => {
+    if (canChangeQuestion && currentQuestionIndex !== null) {
+      const nextIndex = (currentQuestionIndex + 1) % currentQuestions.length;
+      setCurrentQuestionIndex(nextIndex);
+      setSelectedOption(null);
+      setUserAnswer('');
+      setTimer(30);
+      setCanChangeQuestion(false);
+    }
   };
 
   const handleHint = () => {
-    setShowHint(true);
-    setTimeout(() => setShowHint(false), 3000);
+    if (canShowHint && currentQuestionIndex !== null) {
+      setShowHint(true);
+      setCanShowHint(false);
+      setTimeout(() => setShowHint(false), 3000);
+    }
   };
 
   const handleGameOver = () => {
@@ -175,10 +207,11 @@ const Game = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-4">
+      <h1 className="text-4xl font-bold text-white mb-8 animate__animated animate__bounceIn">Fun Quizzes</h1>
+
       {gameState === 'start' && (
-        <div className="w-full max-w-xl bg-white p-8 rounded-lg shadow-xl">
-          <h2 className="text-3xl font-bold mb-6 text-blue-700">Welcome to the Quiz Game</h2>
-          <div className="mb-6">
+        <div className="w-full max-w-xl bg-white p-8 rounded-lg shadow-xl animate__animated animate__fadeIn">
+          <div className="mb-6 animate__animated animate__bounceInLeft">
             <label className="block text-lg font-semibold text-gray-700">Enter your name:</label>
             <input
               type="text"
@@ -187,7 +220,7 @@ const Game = () => {
               className="text-black w-full border border-gray-300 p-3 rounded mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          <div className="mb-6">
+          <div className="mb-6 animate__animated animate__bounceInRight">
             <label className="block text-lg font-semibold text-gray-700">Select a category:</label>
             <select
               value={category}
@@ -204,13 +237,13 @@ const Game = () => {
           </div>
           <button
             onClick={handleStart}
-            className="w-full bg-blue-600 text-white py-3 rounded shadow hover:bg-blue-700 transition duration-200"
+            className="w-full bg-blue-600 text-white py-3 rounded shadow hover:bg-blue-700 transition duration-200 transform hover:scale-105 animate__animated animate__bounceInUp"
           >
             Start Game
           </button>
 
           {showValidationMessage && (
-            <div className="text-red-600 text-sm mt-4 animate-bounce">
+            <div className="text-red-600 text-sm mt-4 animate__animated animate__shakeX">
               Please enter your name and select a category to start the game.
             </div>
           )}
@@ -218,47 +251,37 @@ const Game = () => {
       )}
 
       {gameState === 'playing' && currentQuestionIndex !== null && (
-        <div className="w-full max-w-xl bg-white p-8 rounded-lg shadow-xl">
-          <div className="flex justify-between mb-6">
-            <span className="text-lg font-semibold text-blue-700">Score: {score}</span>
-            <span className="text-lg font-semibold text-red-600">Time: {timer}s</span>
-          </div>
-          <div className="mb-6">
-            <h2 className="text-2xl font-semibold mb-4 text-blue-700">Question {currentQuestionIndex + 1}</h2>
-            <p className="text-gray-700">{currentQuestions[currentQuestionIndex].content}</p>
-          </div>
-          {currentQuestions[currentQuestionIndex].type === 'mcq' && (
-            <div className="flex flex-col">
-              {currentQuestions[currentQuestionIndex].options?.map((option) => (
-                <button
-                  key={option}
-                  onClick={() => handleAnswer(option)}
-                  className={`mb-4 p-3 rounded-lg ${
-                    selectedOption === option
-                      ? option === currentQuestions[currentQuestionIndex].answer
-                        ? 'bg-green-500 text-white'
-                        : 'bg-red-500 text-white'
-                      : 'bg-gray-200 text-gray-800'
-                  } transition duration-200`}
-                  disabled={selectedOption !== null}
-                >
-                  {option}
-                </button>
-              ))}
-            </div>
-          )}
+        <div className="mt-8 w-full max-w-xl bg-white p-8 rounded-lg shadow-xl text-center animate__animated animate__fadeIn">
+          <div className="mb-4 text-right text-gray-700 font-semibold animate__animated animate__fadeInUp">Time left: {timer} seconds</div>
+          <h3 className="text-2xl font-bold text-gray-800 mb-4 animate__animated animate__fadeIn">{currentQuestions[currentQuestionIndex].content}</h3>
+          {currentQuestions[currentQuestionIndex].options?.map((option) => (
+            <button
+              key={option}
+              onClick={() => handleAnswer(option)}
+              className={`mb-4 p-3 rounded-lg w-full text-left ${
+                selectedOption === option
+                  ? option.toLowerCase().trim() === currentQuestions[currentQuestionIndex].answer.toLowerCase().trim()
+                    ? 'bg-green-500 text-white'
+                    : 'bg-red-500 text-white'
+                  : 'bg-gray-200 text-gray-800'
+              } transition duration-200 transform hover:scale-105 animate__animated animate__fadeIn`}
+              disabled={selectedOption !== null}
+            >
+              {option}
+            </button>
+          ))}
 
           {['fill', 'riddle'].includes(currentQuestions[currentQuestionIndex].type) && (
-            <div className="flex flex-col">
+            <div className="flex flex-col animate__animated animate__fadeIn">
               <input
                 type="text"
                 value={userAnswer}
                 onChange={(e) => setUserAnswer(e.target.value)}
-                className="border border-gray-300 p-3 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                className="text-black border border-gray-300 p-3 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <button
                 onClick={() => handleAnswer(userAnswer)}
-                className="bg-blue-600 text-white px-4 py-3 rounded shadow hover:bg-blue-700 transition duration-200"
+                className="bg-blue-600 text-white px-4 py-3 rounded shadow hover:bg-blue-700 transition duration-200 transform hover:scale-105 animate__animated animate__fadeIn"
               >
                 Submit
               </button>
@@ -267,35 +290,48 @@ const Game = () => {
 
           <div className="flex justify-between mt-6">
             <button
-              onClick={handlePauseResume}
-              className="bg-yellow-400 text-white px-4 py-2 rounded shadow hover:bg-yellow-500 transition duration-200"
+              onClick={handleChangeQuestion}
+              className={`bg-yellow-400 text-white px-4 py-2 rounded shadow hover:bg-yellow-500 transition duration-200 transform hover:scale-105 ml-5 ${!canChangeQuestion ? 'opacity-50 cursor-not-allowed' : ''} animate__animated animate__fadeIn`}
+              disabled={!canChangeQuestion}
             >
-              {isPaused ? 'Resume' : 'Pause'}
+              Change Question
             </button>
             <button
               onClick={handleHint}
-              className="bg-purple-600 text-white px-4 py-2 rounded shadow hover:bg-purple-700 transition duration-200 ml-5"
-              disabled={showHint}
+              className={`bg-purple-600 text-white px-4 py-2 rounded shadow hover:bg-purple-700 transition duration-200 transform hover:scale-105 ml-5 ${!canShowHint ? 'opacity-50 cursor-not-allowed' : ''} animate__animated animate__fadeIn`}
+              disabled={!canShowHint}
             >
               Show Hint
             </button>
           </div>
-          {showHint && <p className="mt-4 text-sm text-gray-700">{currentQuestions[currentQuestionIndex].hint}</p>}
+          {showHint && <p className="mt-4 text-sm text-gray-700 animate__animated animate__fadeIn">{currentQuestions[currentQuestionIndex].hint}</p>}
         </div>
       )}
 
       {gameState === 'won' && (
-        <div className="mt-8 w-full max-w-xl text-center">
-          <h2 className="text-3xl font-bold mb-4 text-green-700">Congratulations!</h2>
-          <p className="text-lg text-gray-800">You have completed the game with a score of {score}.</p>
+        <div className="mt-8 w-full max-w-xl text-center bg-white p-8 rounded-lg shadow-xl animate__animated animate__fadeIn">
+          <h2 className="text-3xl font-bold mb-4 text-green-700 animate__animated animate__bounceIn">Congratulations!</h2>
+          <p className="text-lg text-gray-800 animate__animated animate__fadeIn">You have completed the game with a score of {score}.</p>
+          <button
+            onClick={handlePlayAgain}
+            className="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700 transition duration-200 transform hover:scale-105 mt-4 animate__animated animate__bounceIn"
+          >
+            Play Again
+          </button>
           {renderLeaderboard()}
         </div>
       )}
 
       {gameState === 'lost' && (
-        <div className="mt-8 w-full max-w-xl text-center">
-          <h2 className="text-3xl font-bold mb-4 text-red-700">Game Over!</h2>
-          <p className="text-lg text-gray-800">You lost the game. Better luck next time!</p>
+        <div className="mt-8 w-full max-w-xl text-center bg-white p-8 rounded-lg shadow-xl animate__animated animate__fadeIn">
+          <h2 className="text-3xl font-bold mb-4 text-red-700 animate__animated animate__bounceIn">Game Over!</h2>
+          <p className="text-lg text-gray-800 animate__animated animate__fadeIn">You lost the game. Better luck next time!</p>
+          <button
+            onClick={handlePlayAgain}
+            className="bg-red-600 text-white px-4 py-2 rounded shadow hover:bg-red-700 transition duration-200 transform hover:scale-105 mt-4 animate__animated animate__bounceIn"
+          >
+            Play Again
+          </button>
           {renderLeaderboard()}
         </div>
       )}
