@@ -195,7 +195,7 @@ const Game = () => {
               type="text"
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
-              className="w-full border border-gray-300 p-2 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className=" text-black w-full border border-gray-300 p-2 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div className="mb-4">
@@ -205,7 +205,7 @@ const Game = () => {
               onChange={(e) => setCategory(e.target.value)}
               className="w-full border border-gray-300 p-2 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">Choose a category</option>
+              <option className='text-black' value="">Choose a category</option>
               {Object.keys(questionsData).map((cat) => (
                 <option key={cat} value={cat}>
                   {cat.charAt(0).toUpperCase() + cat.slice(1)}
@@ -266,7 +266,7 @@ const Game = () => {
                 type="text"
                 value={userAnswer}
                 onChange={(e) => setUserAnswer(e.target.value)}
-                className="border border-gray-300 p-2 rounded mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="border border-gray-300 p-2 rounded mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
               />
               <button
                 onClick={() => handleAnswer(userAnswer)}
