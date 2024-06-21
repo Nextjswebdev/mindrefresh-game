@@ -35,32 +35,24 @@ const Game = () => {
   const [showHint, setShowHint] = useState<boolean>(false);
   const [showValidationMessage, setShowValidationMessage] = useState<boolean>(false);
 
-  // Define state for Audio objects
-  const [correctSound, setCorrectSound] = useState<HTMLAudioElement | null>(null);
-  const [incorrectSound, setIncorrectSound] = useState<HTMLAudioElement | null>(null);
-
-  useEffect(() => {
-    // Load audio files when component mounts
-    const loadAudioFiles = () => {
-      setCorrectSound(new Audio('/audios/correct.mp3'));
-      setIncorrectSound(new Audio('/audios/wrong.mp3'));
-    };
-
-    // Ensure this runs only on the client side
-    if (typeof window !== 'undefined') {
-      loadAudioFiles();
-    }
-  }, []);
-
+ 
+  
   useEffect(() => {
     // Effect to load leaderboard and highest score from localStorage based on category
     if (category && questionsData[category as keyof typeof questionsData]) {
-      const storedScores = JSON.parse(localStorage.getItem(`leaderboard_${category}`) || '[]') as LeaderboardEntry[];
-      const maxScore = storedScores.length > 0 ? Math.max(...storedScores.map((item) => item.score)) : 0;
-      setHighestScore(maxScore);
-      setLeaderboard(storedScores);
+      try {
+        const storedScores = JSON.parse(localStorage.getItem(`leaderboard_${category}`) || '[]') as LeaderboardEntry[];
+        const maxScore = storedScores.length > 0 ? Math.max(...storedScores.map((item) => item.score)) : 0;
+        setHighestScore(maxScore);
+        setLeaderboard(storedScores);
+      } catch (error) {
+        console.error('Error accessing localStorage:', error);
+        setHighestScore(0);
+        setLeaderboard([]);
+      }
     }
   }, [category]);
+  
 
   useEffect(() => {
     // Timer effect for game play
@@ -83,13 +75,7 @@ const Game = () => {
     const currentQuestion = currentQuestions[currentQuestionIndex];
     const correct = currentQuestion.answer.toLowerCase() === selected.toLowerCase();
 
-    if (correct && correctSound) {
-      const timeBonus = timer;
-      setScore((prevScore) => prevScore + 10 + timeBonus);
-      correctSound.play();
-    } else if (incorrectSound) {
-      incorrectSound.play();
-    }
+   
 
     setSelectedOption(selected);
     setTimeout(() => {
@@ -110,23 +96,26 @@ const Game = () => {
   };
 
   const handleStart = () => {
-    // Handler for starting the game
     if (!userName || !category) {
       setShowValidationMessage(true);
       return;
     }
-
-    setShowValidationMessage(false);
-    setGameState('playing');
-    setCurrentQuestionIndex(0);
-    setScore(0);
-    setSelectedOption(null);
-    setUserAnswer('');
-    setTimer(30);
-
-    const shuffledQuestions = (questionsData as { [key: string]: Question[] })[category].sort(() => Math.random() - 0.5);
-    setCurrentQuestions(shuffledQuestions);
+  
+    try {
+      const shuffledQuestions = (questionsData as { [key: string]: Question[] })[category].sort(() => Math.random() - 0.5);
+      setCurrentQuestions(shuffledQuestions);
+      setShowValidationMessage(false);
+      setGameState('playing');
+      setCurrentQuestionIndex(0);
+      setScore(0);
+      setSelectedOption(null);
+      setUserAnswer('');
+      setTimer(30);
+    } catch (error) {
+      console.error('Error starting the game:', error);
+    }
   };
+  
 
   const handlePauseResume = () => {
     // Handler for pausing and resuming the game
@@ -140,12 +129,16 @@ const Game = () => {
   };
 
   const handleGameOver = () => {
-    // Handler for game over
-    const newLeaderboard = [...leaderboard, { name: userName, score }];
-    newLeaderboard.sort((a, b) => b.score - a.score);
-    localStorage.setItem(`leaderboard_${category}`, JSON.stringify(newLeaderboard));
-    setLeaderboard(newLeaderboard);
+    try {
+      const newLeaderboard = [...leaderboard, { name: userName, score }];
+      newLeaderboard.sort((a, b) => b.score - a.score);
+      localStorage.setItem(`leaderboard_${category}`, JSON.stringify(newLeaderboard));
+      setLeaderboard(newLeaderboard);
+    } catch (error) {
+      console.error('Error updating localStorage:', error);
+    }
   };
+  
 
   const renderLeaderboard = () => {
     // Render leaderboard component
