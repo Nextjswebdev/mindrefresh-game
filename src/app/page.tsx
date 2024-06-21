@@ -35,24 +35,39 @@ const Game = () => {
   const [showHint, setShowHint] = useState<boolean>(false);
   const [showValidationMessage, setShowValidationMessage] = useState<boolean>(false);
 
- 
-  
+  // Helper function to check if localStorage is available
+  const isLocalStorageAvailable = (): boolean => {
+    try {
+      const test = 'localStorageTest';
+      localStorage.setItem(test, test);
+      localStorage.removeItem(test);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  };
+
   useEffect(() => {
     // Effect to load leaderboard and highest score from localStorage based on category
     if (category && questionsData[category as keyof typeof questionsData]) {
-      try {
-        const storedScores = JSON.parse(localStorage.getItem(`leaderboard_${category}`) || '[]') as LeaderboardEntry[];
-        const maxScore = storedScores.length > 0 ? Math.max(...storedScores.map((item) => item.score)) : 0;
-        setHighestScore(maxScore);
-        setLeaderboard(storedScores);
-      } catch (error) {
-        console.error('Error accessing localStorage:', error);
+      if (isLocalStorageAvailable()) {
+        try {
+          const storedScores = JSON.parse(localStorage.getItem(`leaderboard_${category}`) || '[]') as LeaderboardEntry[];
+          const maxScore = storedScores.length > 0 ? Math.max(...storedScores.map((item) => item.score)) : 0;
+          setHighestScore(maxScore);
+          setLeaderboard(storedScores);
+        } catch (error) {
+          console.error('Error accessing localStorage:', error);
+          setHighestScore(0);
+          setLeaderboard([]);
+        }
+      } else {
+        console.warn('localStorage is not available');
         setHighestScore(0);
         setLeaderboard([]);
       }
     }
   }, [category]);
-  
 
   useEffect(() => {
     // Timer effect for game play
@@ -75,11 +90,11 @@ const Game = () => {
     const currentQuestion = currentQuestions[currentQuestionIndex];
     const correct = currentQuestion.answer.toLowerCase() === selected.toLowerCase();
 
-   
-
     setSelectedOption(selected);
     setTimeout(() => {
       if (correct) {
+        setScore((prevScore) => prevScore + 1);  // Increment score if the answer is correct
+
         if (currentQuestionIndex === currentQuestions.length - 1) {
           setGameState('won');
         } else {
@@ -100,14 +115,14 @@ const Game = () => {
       setShowValidationMessage(true);
       return;
     }
-  
+
     try {
       const shuffledQuestions = (questionsData as { [key: string]: Question[] })[category].sort(() => Math.random() - 0.5);
       setCurrentQuestions(shuffledQuestions);
       setShowValidationMessage(false);
       setGameState('playing');
       setCurrentQuestionIndex(0);
-      setScore(0);
+      setScore(0);  // Ensure score is reset to 0 at the start
       setSelectedOption(null);
       setUserAnswer('');
       setTimer(30);
@@ -115,7 +130,6 @@ const Game = () => {
       console.error('Error starting the game:', error);
     }
   };
-  
 
   const handlePauseResume = () => {
     // Handler for pausing and resuming the game
@@ -129,16 +143,19 @@ const Game = () => {
   };
 
   const handleGameOver = () => {
-    try {
-      const newLeaderboard = [...leaderboard, { name: userName, score }];
-      newLeaderboard.sort((a, b) => b.score - a.score);
-      localStorage.setItem(`leaderboard_${category}`, JSON.stringify(newLeaderboard));
-      setLeaderboard(newLeaderboard);
-    } catch (error) {
-      console.error('Error updating localStorage:', error);
+    if (isLocalStorageAvailable()) {
+      try {
+        const newLeaderboard = [...leaderboard, { name: userName, score }];
+        newLeaderboard.sort((a, b) => b.score - a.score);
+        localStorage.setItem(`leaderboard_${category}`, JSON.stringify(newLeaderboard));
+        setLeaderboard(newLeaderboard);
+      } catch (error) {
+        console.error('Error updating localStorage:', error);
+      }
+    } else {
+      console.warn('localStorage is not available');
     }
   };
-  
 
   const renderLeaderboard = () => {
     // Render leaderboard component
@@ -155,55 +172,50 @@ const Game = () => {
       <div className="mt-8 w-full max-w-xl">
         <h2 className="text-2xl font-bold mb-4 text-blue-700">Leaderboard - {category.charAt(0).toUpperCase() + category.slice(1)}</h2>
         <ul className="bg-white p-6 rounded-lg shadow-lg">
-          {leaderboard.slice(0, 10).map((entry, index) => (
-            <li key={index} className="flex justify-between mb-2">
-              <span className="text-lg text-gray-800">{entry.name}</span>
-              <span className="text-lg text-blue-700">{entry.score}</span>
+          {leaderboard.map((entry, index) => (
+            <li key={index} className="flex justify-between text-lg text-gray-800 mb-2">
+              <span>{entry.name}</span>
+              <span>{entry.score}</span>
             </li>
           ))}
         </ul>
-        <button
-          onClick={() => setGameState('start')}
-          className="mt-4 bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition duration-200"
-        >
-          Play Again
-        </button>
       </div>
     );
   };
 
+  // Return JSX for rendering the component
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-blue-200 p-4 sm:p-6 md:p-8">
-      <h1 className="text-4xl font-bold mb-6 text-blue-700 text-center">Fun Learning Game</h1>
-
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
       {gameState === 'start' && (
-        <div className="flex flex-col items-center">
-          <div className="flex flex-col items-center mb-6 w-full max-w-md">
-            <label className="mb-2 text-lg text-blue-700">Enter your name:</label>
+        <div className="w-full max-w-xl bg-white p-6 rounded-lg shadow-lg">
+          <h2 className="text-2xl font-bold mb-4 text-blue-700">Welcome to the Quiz Game</h2>
+          <div className="mb-4">
+            <label className="block text-lg font-semibold text-gray-700">Enter your name:</label>
             <input
               type="text"
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
-              className="border border-blue-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-300 p-2 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          <div className="flex flex-col items-center mb-6 w-full max-w-md">
-            <label className="mb-2 text-lg text-blue-700">Select category:</label>
+          <div className="mb-4">
+            <label className="block text-lg font-semibold text-gray-700">Select a category:</label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="border border-blue-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-300 p-2 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">Choose category</option>
-              <option value="math">Math</option>
-              <option value="general">General Knowledge</option>
-              <option value="riddles">Riddles</option>
-              <option value="emojis">Emojis</option>
+              <option value="">Choose a category</option>
+              {Object.keys(questionsData).map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                </option>
+              ))}
             </select>
           </div>
           <button
             onClick={handleStart}
-            className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition duration-200"
+            className="w-full bg-blue-600 text-white py-2 rounded shadow hover:bg-blue-700 transition duration-200"
           >
             Start Game
           </button>
