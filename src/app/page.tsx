@@ -1,159 +1,284 @@
-'use client';
+'use client'
 
-import Image from 'next/image';
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import correctSoundFile from '../audios/correct.mp3';  
+import incorrectSoundFile from '../audios/wrong.mp3';  
+import questionsData from '../questions.json';
+
+interface Question {
+  type: string;
+  content: string;
+  options?: string[];
+  answer: string;
+  hint: string;
+}
+
+interface LeaderboardEntry {
+  name: string;
+  score: number;
+}
 
 const Game = () => {
+  const [userName, setUserName] = useState<string>('');
+  const [category, setCategory] = useState<string>('');
   const [gameState, setGameState] = useState<'start' | 'playing' | 'won' | 'lost'>('start');
-  const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
+  const [currentQuestions, setCurrentQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number | null>(null);
   const [score, setScore] = useState<number>(0);
-  const [userAnswer, setUserAnswer] = useState<string>('');
+  const [highestScore, setHighestScore] = useState<number>(0);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [userAnswer, setUserAnswer] = useState<string>('');
+  const [timer, setTimer] = useState<number>(30);
+  const [isPaused, setIsPaused] = useState<boolean>(false);
+  const [showHint, setShowHint] = useState<boolean>(false);
+  const [showValidationMessage, setShowValidationMessage] = useState<boolean>(false);
 
-  const questions = [
-    { type: 'mcq', content: 'What is 2 + 2?', options: ['3', '4', '5'], answer: '4' },
-    { type: 'fill', content: 'The capital of France is ___', answer: 'paris' },
-    { type: 'riddle', content: 'I speak without a mouth and hear without ears. What am I?', answer: 'echo' },
-    { type: 'emoji', content: 'What does this emoji mean? 😊', options: ['Happy', 'Sad', 'Angry'], answer: 'Happy' },
-    { type: 'english', content: 'Choose the correct spelling:', options: ['Recieve', 'Receive', 'Recievee'], answer: 'Receive' },
-    { type: 'mcq', content: 'What is 5 + 3?', options: ['7', '8', '9'], answer: '8' },
-    { type: 'fill', content: 'The capital of Japan is ___', answer: 'tokyo' },
-    { type: 'riddle', content: 'I have keys but no locks. I have space but no room. You can enter, but you can’t go outside. What am I?', answer: 'keyboard' },
-    { type: 'emoji', content: 'What does this emoji mean? 😂', options: ['Laughing', 'Crying', 'Angry'], answer: 'Laughing' },
-  ];
+  const correctSound = new Audio(correctSoundFile);
+  const incorrectSound = new Audio(incorrectSoundFile);
 
-  const startGame = () => {
-    setGameState('playing');
-    setSelectedNumbers([]);
-    setCurrentQuestionIndex(null);
-    setScore(0);
-    setUserAnswer('');
-    setSelectedOption(null);
-  };
-
-  const handleNumberClick = (number: number) => {
-    if (!selectedNumbers.includes(number)) {
-      setSelectedNumbers([...selectedNumbers, number]);
-      setCurrentQuestionIndex(number - 1);
-      setSelectedOption(null);
+  useEffect(() => {
+    if (category && questionsData[category as keyof typeof questionsData]) {
+      const storedScores = JSON.parse(localStorage.getItem(`leaderboard_${category}`) || '[]') as LeaderboardEntry[];
+      const maxScore = storedScores.length > 0 ? Math.max(...storedScores.map((item) => item.score)) : 0;
+      setHighestScore(maxScore);
+      setLeaderboard(storedScores);
     }
-  };
+  }, [category]);
 
-  const handleOptionClick = (option: string) => {
-    setUserAnswer(option);
-    setSelectedOption(option);
-  };
+  useEffect(() => {
+    if (!isPaused && gameState === 'playing' && timer > 0) {
+      const interval = setInterval(() => {
+        setTimer((prevTimer) => prevTimer - 1);
+      }, 1000);
 
-  const handleSubmitAnswer = () => {
-    const question = questions[currentQuestionIndex!];
-    if (question.answer.toLowerCase() === userAnswer.trim().toLowerCase()) {
-      setScore(score + 1);
-      if (selectedNumbers.length >= 9) {
-        setGameState('won');
-      } else {
-        setCurrentQuestionIndex(null);
-        setUserAnswer('');
-        setSelectedOption(null);
-      }
-    } else {
+      return () => clearInterval(interval);
+    } else if (timer === 0) {
       setGameState('lost');
+      handleGameOver();
     }
+  }, [isPaused, gameState, timer]);
+
+  const handleAnswer = (selected: string) => {
+    if (gameState !== 'playing' || currentQuestionIndex === null) return;
+
+    const currentQuestion = currentQuestions[currentQuestionIndex];
+    const correct = currentQuestion.answer.toLowerCase() === selected.toLowerCase();
+
+    if (correct) {
+      const timeBonus = timer;
+      setScore((prevScore) => prevScore + 10 + timeBonus);
+      correctSound.play();
+    } else {
+      incorrectSound.play();
+    }
+
+    setSelectedOption(selected);
+    setTimeout(() => {
+      if (correct) {
+        if (currentQuestionIndex === currentQuestions.length - 1) {
+          setGameState('won');
+        } else {
+          setCurrentQuestionIndex(currentQuestionIndex + 1);
+          setSelectedOption(null);
+          setUserAnswer('');
+        }
+      } else {
+        setGameState('lost');
+        handleGameOver();
+      }
+      setTimer(30);
+    }, 1000);
   };
+
+  const handleStart = () => {
+    if (!userName || !category) {
+      setShowValidationMessage(true);
+      return;
+    }
+
+    setShowValidationMessage(false);
+    setGameState('playing');
+    setCurrentQuestionIndex(0);
+    setScore(0);
+    setSelectedOption(null);
+    setUserAnswer('');
+    setTimer(30);
+
+    const shuffledQuestions = (questionsData as { [key: string]: Question[] })[category].sort(() => Math.random() - 0.5);
+    setCurrentQuestions(shuffledQuestions);
+  };
+
+  const handlePauseResume = () => {
+    setIsPaused(!isPaused);
+  };
+
+  const handleHint = () => {
+    setShowHint(true);
+    setTimeout(() => setShowHint(false), 3000);
+  };
+
+  const handleGameOver = () => {
+    const newLeaderboard = [...leaderboard, { name: userName, score }];
+    newLeaderboard.sort((a, b) => b.score - a.score);
+    localStorage.setItem(`leaderboard_${category}`, JSON.stringify(newLeaderboard));
+    setLeaderboard(newLeaderboard);
+  };
+
+  const renderLeaderboard = () => {
+    if (!category || leaderboard.length === 0) {
+      return (
+        <div className="mt-8 w-full max-w-xl">
+          <h2 className="text-2xl font-bold mb-4 text-blue-700">Leaderboard</h2>
+          <p className="text-lg text-gray-800">No scores yet for this category.</p>
+        </div>
+      );
+    }
+  
+    return (
+      <div className="mt-8 w-full max-w-xl">
+        <h2 className="text-2xl font-bold mb-4 text-blue-700">Leaderboard - {category.charAt(0).toUpperCase() + category.slice(1)}</h2>
+        <ul className="bg-white p-6 rounded-lg shadow-lg">
+          {leaderboard.slice(0, 10).map((entry, index) => (
+            <li key={index} className="flex justify-between mb-2">
+              <span className="text-lg text-gray-800">{entry.name}</span>
+              <span className="text-lg text-blue-700">{entry.score}</span>
+            </li>
+          ))}
+        </ul>
+        <button
+          onClick={() => setGameState('start')}
+          className="mt-4 bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition duration-200"
+        >
+          Play Again
+        </button>
+      </div>
+    );
+  };
+  
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-blue-200 p-4 sm:p-6 md:p-8">
+      <h1 className="text-4xl font-bold mb-6 text-blue-700 text-center">Fun Learning Game</h1>
+
       {gameState === 'start' && (
-        <div className="flex flex-col items-center bg-white p-8 rounded shadow-lg">
-          <h1 className="text-3xl font-bold mb-4 text-black">Welcome to the Quiz Game</h1>
-          <p className="mb-4 text-center text-gray-700">Test your knowledge with fun questions and puzzles!</p>
+        <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center mb-6 w-full max-w-md">
+            <label className="mb-2 text-lg text-blue-700">Enter your name:</label>
+            <input
+              type="text"
+              value={userName}
+              onChange={(e) => setUserName(e.target.value)}
+              className="border border-blue-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div className="flex flex-col items-center mb-6 w-full max-w-md">
+            <label className="mb-2 text-lg text-blue-700">Select category:</label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="border border-blue-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Choose category</option>
+              <option value="math">Math</option>
+              <option value="general">General Knowledge</option>
+              <option value="riddles">Riddles</option>
+              <option value="emojis">Emojis</option>
+            </select>
+          </div>
           <button
-            className="px-6 py-3 font-semibold text-white bg-black rounded hover:bg-white hover:text-black transition duration-300 ease-in-out transform hover:scale-105"
-            onClick={startGame}
+            onClick={handleStart}
+            className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition duration-200"
           >
             Start Game
           </button>
-        </div>
-      )}
 
-      {gameState === 'playing' && (
-        <div className="w-full max-w-md">
-          <div className="text-2xl font-bold mb-4 text-center text-black">Score: {score}</div>
-          <div className="grid grid-cols-3 gap-4 mb-4">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((number) => (
-              <button
-                key={number}
-                className={`px-4 py-2 font-semibold rounded ${selectedNumbers.includes(number) ? 'bg-gray-400 cursor-not-allowed' : 'text-white bg-green-500 cursor-pointer hover:bg-green-600 transition duration-300 ease-in-out transform hover:scale-105'}`}
-                onClick={() => handleNumberClick(number)}
-                disabled={selectedNumbers.includes(number)}
-              >
-                {number}
-              </button>
-            ))}
-          </div>
-
-          {currentQuestionIndex !== null && (
-            <div className="mt-4 p-4 bg-white  rounded shadow-lg transition duration-500 ease-in-out transform">
-              <p className="mb-4 text-lg text-black">{questions[currentQuestionIndex].content}</p>
-              {['mcq', 'emoji', 'english'].includes(questions[currentQuestionIndex].type) && (
-                <div className="mt-2 flex flex-col gap-2 text-black">
-                  {questions[currentQuestionIndex].options?.map((option, index) => (
-                    <button
-                      key={index}
-                      className={`px-4 py-2 mt-2 font-semibold rounded ${selectedOption === option ? 'bg-yellow-500' : 'bg-purple-500 text-white'} hover:bg-purple-600 transition duration-300 ease-in-out transform hover:scale-105`}
-                      onClick={() => handleOptionClick(option)}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {['fill', 'riddle'].includes(questions[currentQuestionIndex].type) && (
-                <input
-                  type="text"
-                  className="px-4 py-2 mt-2 border rounded w-full"
-                  value={userAnswer}
-                  onChange={(e) => setUserAnswer(e.target.value)}
-                />
-              )}
-
-              <button
-                className="px-4 py-2 mt-4 font-semibold text-white bg-black rounded hover:bg-white hover:text-black transition duration-300 ease-in-out transform hover:scale-105"
-                onClick={handleSubmitAnswer}
-              >
-                Submit Answer
-              </button>
+          {showValidationMessage && (
+            <div className="text-red-600 text-lg mt-4 animate-bounce">
+              Please enter your name and select a category to start the game.
             </div>
           )}
         </div>
       )}
 
-      {gameState === 'won' && (
-        <div className="flex flex-col items-center animate-bounce">
-          <p className="text-xl font-bold text-green-500 mb-4">You Won!</p>
-          <Image src="https://media.giphy.com/media/1GTZA4flUzQI0/giphy.gif" width={256} height={256} alt="You won gif" />
-          <p className="text-xl font-bold mt-4">Your Final Score: {score}</p>
+      {gameState === 'playing' && currentQuestionIndex !== null && (
+        <div className="w-full max-w-xl bg-white p-6 rounded-lg shadow-lg">
+          <div className="flex justify-between mb-4">
+            <span className="text-lg font-semibold text-blue-700">Score: {score}</span>
+            <span className="text-lg font-semibold text-red-600">Time: {timer}s</span>
+          </div>
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold mb-2 text-blue-700">Question {currentQuestionIndex + 1}</h2>
+            <p className="text-gray-700">{currentQuestions[currentQuestionIndex].content}</p>
+          </div>
+          {currentQuestions[currentQuestionIndex].type === 'mcq' && (
+  <div className="flex flex-col">
+    {currentQuestions[currentQuestionIndex].options?.map((option) => (
+      <button
+        key={option}
+        onClick={() => handleAnswer(option)}
+        className={`mb-2 p-2 rounded-lg ${
+          selectedOption === option
+            ? option === currentQuestions[currentQuestionIndex].answer
+              ? 'bg-green-500 text-white'
+              : 'bg-red-500 text-white'
+            : 'bg-gray-200 text-gray-800'
+        } transition duration-200`}
+        disabled={selectedOption !== null}
+        style={{ fontFamily: 'Segoe UI Emoji, Apple Color Emoji, Segoe UI Symbol, Noto Color Emoji, EmojiSymbols' }}
+      >
+        {option}
+      </button>
+    ))}
+  </div>
+)}
+
+          {['fill', 'riddle'].includes(currentQuestions[currentQuestionIndex].type) && (
+            <div className="flex flex-col">
+              <input
+                type="text"
+                value={userAnswer}
+                onChange={(e) => setUserAnswer(e.target.value)}
+                className="border border-gray-300 p-2 rounded mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                onClick={() => handleAnswer(userAnswer)}
+                className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition duration-200"
+              >
+                Submit
+              </button>
+            </div>
+          )}
           <button
-            className="px-6 py-3 mt-4 font-semibold text-white bg-black rounded hover:bg-white hover:text-black transition duration-300 ease-in-out transform hover:scale-105"
-            onClick={startGame}
+            onClick={handlePauseResume}
+            className="mt-4 bg-yellow-400 text-white px-4 py-2 rounded shadow hover:bg-yellow-500 transition duration-200"
           >
-            Play Again
+            {isPaused ? 'Resume' : 'Pause'}
           </button>
+          <button
+            onClick={handleHint}
+            className="mt-2 bg-purple-600 text-white px-4 py-2 rounded shadow hover:bg-purple-700 transition duration-200 ml-5"
+            disabled={showHint}
+          >
+            Show Hint
+          </button>
+          {showHint && <p className="mt-2 text-sm text-gray-700">{currentQuestions[currentQuestionIndex].hint}</p>}
+        </div>
+      )}
+
+      {gameState === 'won' && (
+        <div className="mt-8 w-full max-w-xl">
+          <h2 className="text-2xl font-bold mb-4 text-green-700">Congratulations!</h2>
+          <p className="text-lg text-gray-800">You have completed the game with a score of {score}.</p>
+          {renderLeaderboard()}
         </div>
       )}
 
       {gameState === 'lost' && (
-        <div className="flex flex-col items-center animate-pulse">
-          <p className="text-xl font-bold text-red-500 mb-4">You Lost!</p>
-          <Image src="https://media.giphy.com/media/mxXPuScIwPwK2oyD6i/giphy.gif" width={256} height={256} alt="You lost gif" />
-          <p className="text-xl font-bold mt-4 text-black">Your Final Score: {score}</p>
-          <button
-            className="px-6 py-3 mt-4 font-semibold text-white bg-black rounded hover:bg-white hover:text-black transition duration-300 ease-in-out transform hover:scale-105"
-            onClick={startGame}
-          >
-            Play Again
-          </button>
+        <div className="mt-8 w-full max-w-xl">
+          <h2 className="text-2xl font-bold mb-4 text-red-700">Game Over!</h2>
+          <p className="text-lg text-gray-800">You lost the game. Better luck next time!</p>
+          {renderLeaderboard()}
         </div>
       )}
     </div>
