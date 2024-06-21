@@ -1,10 +1,10 @@
 'use client'
 
+// Import necessary modules and types
 import React, { useState, useEffect } from 'react';
-import correctSoundFile from '../audios/correct.mp3';  
-import incorrectSoundFile from '../audios/wrong.mp3';  
 import questionsData from '../questions.json';
 
+// Define interfaces for types used in the component
 interface Question {
   type: string;
   content: string;
@@ -18,6 +18,7 @@ interface LeaderboardEntry {
   score: number;
 }
 
+// Define the Game component
 const Game = () => {
   const [userName, setUserName] = useState<string>('');
   const [category, setCategory] = useState<string>('');
@@ -34,10 +35,25 @@ const Game = () => {
   const [showHint, setShowHint] = useState<boolean>(false);
   const [showValidationMessage, setShowValidationMessage] = useState<boolean>(false);
 
-  const correctSound = new Audio(correctSoundFile);
-  const incorrectSound = new Audio(incorrectSoundFile);
+  // Define state for Audio objects
+  const [correctSound, setCorrectSound] = useState<HTMLAudioElement | null>(null);
+  const [incorrectSound, setIncorrectSound] = useState<HTMLAudioElement | null>(null);
 
   useEffect(() => {
+    // Load audio files when component mounts
+    const loadAudioFiles = () => {
+      setCorrectSound(new Audio('/audios/correct.mp3'));
+      setIncorrectSound(new Audio('/audios/wrong.mp3'));
+    };
+
+    // Ensure this runs only on the client side
+    if (typeof window !== 'undefined') {
+      loadAudioFiles();
+    }
+  }, []);
+
+  useEffect(() => {
+    // Effect to load leaderboard and highest score from localStorage based on category
     if (category && questionsData[category as keyof typeof questionsData]) {
       const storedScores = JSON.parse(localStorage.getItem(`leaderboard_${category}`) || '[]') as LeaderboardEntry[];
       const maxScore = storedScores.length > 0 ? Math.max(...storedScores.map((item) => item.score)) : 0;
@@ -47,6 +63,7 @@ const Game = () => {
   }, [category]);
 
   useEffect(() => {
+    // Timer effect for game play
     if (!isPaused && gameState === 'playing' && timer > 0) {
       const interval = setInterval(() => {
         setTimer((prevTimer) => prevTimer - 1);
@@ -60,16 +77,17 @@ const Game = () => {
   }, [isPaused, gameState, timer]);
 
   const handleAnswer = (selected: string) => {
+    // Handler for processing user answers
     if (gameState !== 'playing' || currentQuestionIndex === null) return;
 
     const currentQuestion = currentQuestions[currentQuestionIndex];
     const correct = currentQuestion.answer.toLowerCase() === selected.toLowerCase();
 
-    if (correct) {
+    if (correct && correctSound) {
       const timeBonus = timer;
       setScore((prevScore) => prevScore + 10 + timeBonus);
       correctSound.play();
-    } else {
+    } else if (incorrectSound) {
       incorrectSound.play();
     }
 
@@ -92,6 +110,7 @@ const Game = () => {
   };
 
   const handleStart = () => {
+    // Handler for starting the game
     if (!userName || !category) {
       setShowValidationMessage(true);
       return;
@@ -110,15 +129,18 @@ const Game = () => {
   };
 
   const handlePauseResume = () => {
+    // Handler for pausing and resuming the game
     setIsPaused(!isPaused);
   };
 
   const handleHint = () => {
+    // Handler for displaying hint
     setShowHint(true);
     setTimeout(() => setShowHint(false), 3000);
   };
 
   const handleGameOver = () => {
+    // Handler for game over
     const newLeaderboard = [...leaderboard, { name: userName, score }];
     newLeaderboard.sort((a, b) => b.score - a.score);
     localStorage.setItem(`leaderboard_${category}`, JSON.stringify(newLeaderboard));
@@ -126,6 +148,7 @@ const Game = () => {
   };
 
   const renderLeaderboard = () => {
+    // Render leaderboard component
     if (!category || leaderboard.length === 0) {
       return (
         <div className="mt-8 w-full max-w-xl">
@@ -134,7 +157,7 @@ const Game = () => {
         </div>
       );
     }
-  
+
     return (
       <div className="mt-8 w-full max-w-xl">
         <h2 className="text-2xl font-bold mb-4 text-blue-700">Leaderboard - {category.charAt(0).toUpperCase() + category.slice(1)}</h2>
@@ -155,7 +178,6 @@ const Game = () => {
       </div>
     );
   };
-  
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-blue-200 p-4 sm:p-6 md:p-8">
@@ -212,27 +234,27 @@ const Game = () => {
             <p className="text-gray-700">{currentQuestions[currentQuestionIndex].content}</p>
           </div>
           {currentQuestions[currentQuestionIndex].type === 'mcq' && (
-  <div className="flex flex-col">
-    {currentQuestions[currentQuestionIndex].options?.map((option) => (
-      <button
-        key={option}
-        onClick={() => handleAnswer(option)}
-        className={`mb-2 p-2 rounded-lg ${
-          selectedOption === option
-            ? option === currentQuestions[currentQuestionIndex].answer
-              ? 'bg-green-500 text-white'
-              : 'bg-red-500 text-white'
-            : 'bg-gray-200 text-gray-800'
-        } transition duration-200`}
-        disabled={selectedOption !== null}
-        style={{ fontFamily: 'Segoe UI Emoji, Apple Color Emoji, Segoe UI Symbol, Noto Color Emoji, EmojiSymbols' }}
-      >
-        {option}
-      </button>
-    ))}
-  </div>
-)}
+            <div className="flex flex-col">
+              {currentQuestions[currentQuestionIndex].options?.map((option) => (
+                <button
+                  key={option}
+                  onClick={() => handleAnswer(option)}
+                  className={`mb-2 p-2 rounded-lg ${
+                    selectedOption === option
+                      ? option === currentQuestions[currentQuestionIndex].answer
+                        ? 'bg-green-500 text-white'
+                        : 'bg-red-500 text-white'
+                      : 'bg-gray-200 text-gray-800'
+                  } transition duration-200`}
+                  disabled={selectedOption !== null}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          )}
 
+          {/* Additional logic for other question types */}
           {['fill', 'riddle'].includes(currentQuestions[currentQuestionIndex].type) && (
             <div className="flex flex-col">
               <input
@@ -249,6 +271,8 @@ const Game = () => {
               </button>
             </div>
           )}
+
+          {/* Buttons for pause, hint, etc. */}
           <button
             onClick={handlePauseResume}
             className="mt-4 bg-yellow-400 text-white px-4 py-2 rounded shadow hover:bg-yellow-500 transition duration-200"
@@ -266,6 +290,7 @@ const Game = () => {
         </div>
       )}
 
+      {/* Game over and congratulations screens */}
       {gameState === 'won' && (
         <div className="mt-8 w-full max-w-xl">
           <h2 className="text-2xl font-bold mb-4 text-green-700">Congratulations!</h2>
