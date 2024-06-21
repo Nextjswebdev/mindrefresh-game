@@ -1,10 +1,8 @@
 'use client'
 
-// Import necessary modules and types
 import React, { useState, useEffect } from 'react';
 import questionsData from '../questions.json';
 
-// Define interfaces for types used in the component
 interface Question {
   type: string;
   content: string;
@@ -18,7 +16,6 @@ interface LeaderboardEntry {
   score: number;
 }
 
-// Define the Game component
 const Game = () => {
   const [userName, setUserName] = useState<string>('');
   const [category, setCategory] = useState<string>('');
@@ -35,7 +32,6 @@ const Game = () => {
   const [showHint, setShowHint] = useState<boolean>(false);
   const [showValidationMessage, setShowValidationMessage] = useState<boolean>(false);
 
-  // Helper function to check if localStorage is available
   const isLocalStorageAvailable = (): boolean => {
     try {
       const test = 'localStorageTest';
@@ -48,7 +44,6 @@ const Game = () => {
   };
 
   useEffect(() => {
-    // Effect to load leaderboard and highest score from localStorage based on category
     if (category && questionsData[category as keyof typeof questionsData]) {
       if (isLocalStorageAvailable()) {
         try {
@@ -70,7 +65,6 @@ const Game = () => {
   }, [category]);
 
   useEffect(() => {
-    // Timer effect for game play
     if (!isPaused && gameState === 'playing' && timer > 0) {
       const interval = setInterval(() => {
         setTimer((prevTimer) => prevTimer - 1);
@@ -84,7 +78,6 @@ const Game = () => {
   }, [isPaused, gameState, timer]);
 
   const handleAnswer = (selected: string) => {
-    // Handler for processing user answers
     if (gameState !== 'playing' || currentQuestionIndex === null) return;
 
     const currentQuestion = currentQuestions[currentQuestionIndex];
@@ -93,7 +86,7 @@ const Game = () => {
     setSelectedOption(selected);
     setTimeout(() => {
       if (correct) {
-        setScore((prevScore) => prevScore + 1);  // Increment score if the answer is correct
+        setScore((prevScore) => prevScore + 1);
 
         if (currentQuestionIndex === currentQuestions.length - 1) {
           setGameState('won');
@@ -122,7 +115,7 @@ const Game = () => {
       setShowValidationMessage(false);
       setGameState('playing');
       setCurrentQuestionIndex(0);
-      setScore(0);  // Ensure score is reset to 0 at the start
+      setScore(0);
       setSelectedOption(null);
       setUserAnswer('');
       setTimer(30);
@@ -132,12 +125,10 @@ const Game = () => {
   };
 
   const handlePauseResume = () => {
-    // Handler for pausing and resuming the game
     setIsPaused(!isPaused);
   };
 
   const handleHint = () => {
-    // Handler for displaying hint
     setShowHint(true);
     setTimeout(() => setShowHint(false), 3000);
   };
@@ -158,7 +149,6 @@ const Game = () => {
   };
 
   const renderLeaderboard = () => {
-    // Render leaderboard component
     if (!category || leaderboard.length === 0) {
       return (
         <div className="mt-8 w-full max-w-xl">
@@ -183,7 +173,6 @@ const Game = () => {
     );
   };
 
-  // Return JSX for rendering the component
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
       {gameState === 'start' && (
@@ -195,7 +184,7 @@ const Game = () => {
               type="text"
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
-              className=" text-black w-full border border-gray-300 p-2 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="text-black w-full border border-gray-300 p-2 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div className="mb-4">
@@ -205,7 +194,7 @@ const Game = () => {
               onChange={(e) => setCategory(e.target.value)}
               className="w-full border border-gray-300 p-2 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option className='text-black' value="">Choose a category</option>
+              <option className="text-black" value="">Choose a category</option>
               {Object.keys(questionsData).map((cat) => (
                 <option key={cat} value={cat}>
                   {cat.charAt(0).toUpperCase() + cat.slice(1)}
@@ -259,7 +248,6 @@ const Game = () => {
             </div>
           )}
 
-          {/* Additional logic for other question types */}
           {['fill', 'riddle'].includes(currentQuestions[currentQuestionIndex].type) && (
             <div className="flex flex-col">
               <input
@@ -277,7 +265,6 @@ const Game = () => {
             </div>
           )}
 
-          {/* Buttons for pause, hint, etc. */}
           <button
             onClick={handlePauseResume}
             className="mt-4 bg-yellow-400 text-white px-4 py-2 rounded shadow hover:bg-yellow-500 transition duration-200"
@@ -295,7 +282,6 @@ const Game = () => {
         </div>
       )}
 
-      {/* Game over and congratulations screens */}
       {gameState === 'won' && (
         <div className="mt-8 w-full max-w-xl">
           <h2 className="text-2xl font-bold mb-4 text-green-700">Congratulations!</h2>
