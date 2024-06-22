@@ -1,47 +1,21 @@
 {
-    "math": [
-      { "type": "mcq", "content": "What is 2 + 2?", "options": ["3", "4", "5"], "answer": "4", "hint": "Think simple math" },
-      { "type": "mcq", "content": "What is 5 + 3?", "options": ["7", "8", "9"], "answer": "8", "hint": "Simple addition" },
-      { "type": "mcq", "content": "What is 6 + 1?", "options": ["6", "7", "8"], "answer": "7", "hint": "Simple addition" },
-      { "type": "mcq", "content": "What is 7 + 2?", "options": ["8", "9", "10"], "answer": "9", "hint": "Simple addition" },
-      { "type": "mcq", "content": "What is 8 + 1?", "options": ["8", "9", "10"], "answer": "9", "hint": "Simple addition" },
-      { "type": "mcq", "content": "What is 1 + 1?", "options": ["1", "2", "3"], "answer": "2", "hint": "Simple addition" },
-      { "type": "mcq", "content": "What is 4 + 4?", "options": ["7", "8", "9"], "answer": "8", "hint": "Simple addition" },
-      { "type": "mcq", "content": "What is 3 + 2?", "options": ["4", "5", "6"], "answer": "5", "hint": "Simple addition" },
-      { "type": "mcq", "content": "What is 9 - 2?", "options": ["6", "7", "8"], "answer": "7", "hint": "Simple subtraction" }
-    ],
-    "general": [
-      { "type": "fill", "content": "The capital of France is ___", "answer": "paris", "hint": "City of lights" },
-      { "type": "fill", "content": "The capital of Japan is ___", "answer": "tokyo", "hint": "Land of the rising sun" },
-      { "type": "mcq", "content": "What is the largest planet?", "options": ["Earth", "Mars", "Jupiter"], "answer": "Jupiter", "hint": "Gas giant" },
-      { "type": "mcq", "content": "Who wrote \"1984\"?", "options": ["George Orwell", "Aldous Huxley", "Ray Bradbury"], "answer": "George Orwell", "hint": "Dystopian novel" },
-      { "type": "mcq", "content": "What is the boiling point of water?", "options": ["90°C", "100°C", "110°C"], "answer": "100°C", "hint": "Standard atmospheric pressure" },
-      { "type": "fill", "content": "The capital of Italy is ___", "answer": "rome", "hint": "Historic city" },
-      { "type": "mcq", "content": "Which is the smallest continent?", "options": ["Asia", "Australia", "Europe"], "answer": "Australia", "hint": "Down under" },
-      { "type": "fill", "content": "The capital of Canada is ___", "answer": "ottawa", "hint": "North America" },
-      { "type": "mcq", "content": "Which is the longest river?", "options": ["Amazon", "Nile", "Yangtze"], "answer": "Nile", "hint": "Africa" }
-    ],
-    "riddles": [
-      { "type": "riddle", "content": "I speak without a mouth and hear without ears. What am I?", "answer": "echo", "hint": "Sound" },
-      { "type": "riddle", "content": "I have keys but no locks. I have space but no room. You can enter, but you can’t go outside. What am I?", "answer": "keyboard", "hint": "Computer accessory" },
-      { "type": "riddle", "content": "I am not alive, but I can grow. I don’t have lungs, but I need air. What am I?", "answer": "fire", "hint": "Element" },
-      { "type": "riddle", "content": "I can fly without wings. I can cry without eyes. What am I?", "answer": "cloud", "hint": "Sky" },
-      { "type": "riddle", "content": "The more you take, the more you leave behind. What am I?", "answer": "footsteps", "hint": "Walking" },
-      { "type": "riddle", "content": "I have cities, but no houses. I have mountains, but no trees. What am I?", "answer": "map", "hint": "Navigation" },
-      { "type": "riddle", "content": "What has a head, a tail, is brown, and has no legs?", "answer": "penny", "hint": "Currency" },
-      { "type": "riddle", "content": "What comes once in a minute, twice in a moment, but never in a thousand years?", "answer": "m", "hint": "Letter" },
-      { "type": "riddle", "content": "What has a heart that doesn’t beat?", "answer": "artichoke", "hint": "Vegetable" }
-    ],
-    "emojis": [
-      { "type": "mcq", "content": "What does this emoji mean? 😊", "options": ["Happy", "Sad", "Angry"], "answer": "Happy", "hint": "Positive emotion" },
-      { "type": "mcq", "content": "What does this emoji mean? 😂", "options": ["Laughing", "Crying", "Angry"], "answer": "Laughing", "hint": "Joyful emotion" },
-      { "type": "mcq", "content": "What does this emoji mean? 😢", "options": ["Happy", "Sad", "Angry"], "answer": "Sad", "hint": "Negative emotion" },
-      { "type": "mcq", "content": "What does this emoji mean? 😡", "options": ["Happy", "Sad", "Angry"], "answer": "Angry", "hint": "Negative emotion" },
-      { "type": "mcq", "content": "What does this emoji mean? 😍", "options": ["Love", "Hate", "Bored"], "answer": "Love", "hint": "Positive emotion" },
-      { "type": "mcq", "content": "What does this emoji mean? 🤔", "options": ["Thinking", "Bored", "Confused"], "answer": "Thinking", "hint": "Contemplation" },
-      { "type": "mcq", "content": "What does this emoji mean? 😴", "options": ["Tired", "Happy", "Sad"], "answer": "Tired", "hint": "Sleepy" },
-      { "type": "mcq", "content": "What does this emoji mean? 😎", "options": ["Cool", "Happy", "Sad"], "answer": "Cool", "hint": "Positive emotion" },
-      { "type": "mcq", "content": "What does this emoji mean? 🤗", "options": ["Hug", "Sad", "Angry"], "answer": "Hug", "hint": "Positive emotion" }
-    ]
-  }
-  
+  "math": [
+    { "type": "mcq", "content": "What is 5 + 3?", "options": ["7", "8", "9"], "answer": "8", "hint": "Simple addition" },
+    { "type": "mcq", "content": "What is 10 - 4?", "options": ["5", "6", "7"], "answer": "6", "hint": "Basic subtraction" },
+    { "type": "mcq", "content": "What is 2 * 6?", "options": ["10", "12", "14"], "answer": "12", "hint": "Simple multiplication" },
+    { "type": "mcq", "content": "What is 15 / 3?", "options": ["3", "4", "5"], "answer": "5", "hint": "Basic division" },
+    { "type": "mcq", "content": "What is 7 squared?", "options": ["49", "50", "51"], "answer": "49", "hint": "Exponentiation" },
+    { "type": "mcq", "content": "What is the remainder of 10 divided by 3?", "options": ["1", "2", "3"], "answer": "1", "hint": "Modulo operation" },
+    { "type": "mcq", "content": "What is the square root of 16?", "options": ["3", "4", "5"], "answer": "4", "hint": "Square roots" },
+    { "type": "mcq", "content": "What is 3 to the power of 4?", "options": ["76", "81", "86"], "answer": "81", "hint": "Exponentiation" },
+    
+    { "type": "fill", "content": "The result of 5 + 2 is ___", "answer": "7", "hint": "Basic arithmetic" },
+    { "type": "fill", "content": "If you have 10 apples and give away 3, how many apples do you have left?", "answer": "7", "hint": "Subtraction" },
+    { "type": "fill", "content": "What is 4 multiplied by 3?", "answer": "12", "hint": "Multiplication" },
+    { "type": "fill", "content": "If a pizza is divided into 8 slices and you eat 3, how many slices are left?", "answer": "5", "hint": "Division" },
+    { "type": "fill", "content": "What is the area of a square with side length 5?", "answer": "25", "hint": "Geometry" },
+    { "type": "fill", "content": "If you have 24 hours in a day, how many minutes is that?", "answer": "1440", "hint": "Time conversion" },
+    { "type": "fill", "content": "How many sides does a triangle have?", "answer": "3", "hint": "Geometry" },
+    { "type": "fill", "content": "What is the value of pi (π) rounded to two decimal places?", "answer": "3.14", "hint": "Mathematical constant" }
+  ]
+}

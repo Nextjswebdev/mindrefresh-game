@@ -19,7 +19,6 @@ interface LeaderboardEntry {
 
 const Game = () => {
   const [userName, setUserName] = useState<string>('');
-  const [category, setCategory] = useState<string>('');
   const [gameState, setGameState] = useState<'start' | 'playing' | 'won' | 'lost'>('start');
   const [currentQuestions, setCurrentQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number | null>(null);
@@ -46,10 +45,10 @@ const Game = () => {
   };
 
   useEffect(() => {
-    if (category && questionsData[category as keyof typeof questionsData]) {
+    if (questionsData) {
       if (isLocalStorageAvailable()) {
         try {
-          const storedScores = JSON.parse(localStorage.getItem(`leaderboard_${category}`) || '[]') as LeaderboardEntry[];
+          const storedScores = JSON.parse(localStorage.getItem('leaderboard') || '[]') as LeaderboardEntry[];
           const maxScore = storedScores.length > 0 ? Math.max(...storedScores.map((item) => item.score)) : 0;
           setHighestScore(maxScore);
           setLeaderboard(storedScores);
@@ -64,38 +63,47 @@ const Game = () => {
         setLeaderboard([]);
       }
     }
-  }, [category]);
+  }, []);
 
   useEffect(() => {
     if (gameState === 'playing' && timer > 0) {
       const interval = setInterval(() => {
         setTimer((prevTimer) => prevTimer - 1);
       }, 1000);
-
+  
       return () => clearInterval(interval);
     } else if (timer === 0) {
       setGameState('lost');
-      handleGameOver();
+      handleGameOver(score); // Pass the current score to handleGameOver
     }
-  }, [gameState, timer]);
+  }, [gameState, timer, score]);
+  
 
   const handleAnswer = (selected: string) => {
     if (gameState !== 'playing' || currentQuestionIndex === null) return;
-
+  
     const currentQuestion = currentQuestions[currentQuestionIndex];
-    const correctAnswer = currentQuestion.answer.toLowerCase().trim(); // Trim correct answer
-
-    // Trim user's answer and compare ignoring spaces
+    const correctAnswer = currentQuestion.answer.toLowerCase().trim();
     const userAnswerTrimmed = selected.toLowerCase().trim();
     const correct = userAnswerTrimmed === correctAnswer;
-
+  
     setSelectedOption(selected);
+  
+    const timeTaken = 30 - timer;
+    let timeScore = Math.max(0, 20 - 2 * timeTaken);
+  
+    if (timeTaken > 20) {
+      timeScore = 0;
+    }
+  
     setTimeout(() => {
       if (correct) {
-        setScore((prevScore) => prevScore + 1);
-
+        const newScore = score + timeScore + 1;
+        setScore(newScore);
+  
         if (currentQuestionIndex === currentQuestions.length - 1) {
           setGameState('won');
+          handleGameOver(newScore); // Pass the final score
         } else {
           setCurrentQuestionIndex(currentQuestionIndex + 1);
           setSelectedOption(null);
@@ -103,25 +111,26 @@ const Game = () => {
         }
       } else {
         setGameState('lost');
-        handleGameOver();
+        handleGameOver(score); // Pass the current score
       }
       setTimer(30);
     }, 1000);
   };
+  
 
   const handleStart = () => {
-    if (!userName || !category) {
+    if (!userName) {
       setShowValidationMessage(true);
       return;
     }
-
+  
     try {
-      const shuffledQuestions = (questionsData as { [key: string]: Question[] })[category].sort(() => Math.random() - 0.5);
+      const shuffledQuestions = Object.values(questionsData).flat().sort(() => Math.random() - 0.5);
       setCurrentQuestions(shuffledQuestions);
       setShowValidationMessage(false);
       setGameState('playing');
       setCurrentQuestionIndex(0);
-      setScore(0);
+      setScore(0); // Ensure score is reset when starting a new game
       setSelectedOption(null);
       setUserAnswer('');
       setTimer(30);
@@ -130,12 +139,15 @@ const Game = () => {
     } catch (error) {
       console.error('Error starting the game:', error);
     }
+  
+    // Pass initial score of 0 to handleGameOver
+    handleGameOver(0);
   };
+  
 
   const handlePlayAgain = () => {
     setGameState('start');
     setUserName('');
-    setCategory('');
     setScore(0);
     setCurrentQuestionIndex(null);
     setSelectedOption(null);
@@ -165,13 +177,13 @@ const Game = () => {
     }
   };
 
-  const handleGameOver = () => {
+  const handleGameOver = (finalScore: number) => {
     if (isLocalStorageAvailable()) {
       try {
-        const newLeaderboard = [...leaderboard, { name: userName, score }];
+        const newLeaderboard = [...leaderboard, { name: userName, score: finalScore }];
         newLeaderboard.sort((a, b) => b.score - a.score);
-        localStorage.setItem(`leaderboard_${category}`, JSON.stringify(newLeaderboard));
-        setLeaderboard(newLeaderboard);
+        localStorage.setItem('leaderboard', JSON.stringify(newLeaderboard.slice(0, 10))); // Limiting to top 10 entries
+        setLeaderboard(newLeaderboard.slice(0, 10));
       } catch (error) {
         console.error('Error updating localStorage:', error);
       }
@@ -179,23 +191,29 @@ const Game = () => {
       console.warn('localStorage is not available');
     }
   };
+  
+  
+  
 
   const renderLeaderboard = () => {
-    if (!category || leaderboard.length === 0) {
+    if (leaderboard.length === 0) {
       return (
         <div className="mt-8 w-full max-w-xl">
           <h2 className="text-3xl font-bold mb-4 text-blue-700">Leaderboard</h2>
-          <p className="text-lg text-gray-800">No scores yet for this category.</p>
+          <p className="text-lg text-gray-800">No scores yet.</p>
         </div>
       );
     }
 
     return (
       <div className="mt-8 w-full max-w-xl">
-        <h2 className="text-3xl font-bold mb-4 text-blue-700">Leaderboard - {category.charAt(0).toUpperCase() + category.slice(1)}</h2>
+        <h2 className="text-3xl font-bold mb-4 text-blue-700">Leaderboard</h2>
         <ul className="bg-white p-6 rounded-lg shadow-lg">
           {leaderboard.map((entry, index) => (
-            <li key={index} className="flex justify-between text-lg text-gray-800 mb-2">
+            <li
+              key={index}
+              className={`flex justify-between text-lg text-gray-800 mb-2 ${index === 0 ? 'leaderboard-item' : ''}`}
+            >
               <span>{entry.name}</span>
               <span>{entry.score}</span>
             </li>
@@ -207,7 +225,7 @@ const Game = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-4">
-      <h1 className="text-4xl font-bold text-white mb-8 animate__animated animate__bounceIn">Fun Quizzes</h1>
+      <h1 className="xl:text-5xl text-3xl font-bold text-white mb-8 animate__animated animate__bounceIn">Fun Quizzes</h1>
 
       {gameState === 'start' && (
         <div className="w-full max-w-xl bg-white p-8 rounded-lg shadow-xl animate__animated animate__fadeIn">
@@ -217,23 +235,8 @@ const Game = () => {
               type="text"
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
-              className="text-black w-full border border-gray-300 p-3 rounded mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="text-black w-full border border-gray-300 p-3 rounded mt-2 focus:outline-none "
             />
-          </div>
-          <div className="mb-6 animate__animated animate__bounceInRight">
-            <label className="block text-lg font-semibold text-gray-700">Select a category:</label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full border border-gray-300 p-3 rounded mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-            >
-              <option className="text-black" value="">Choose a category</option>
-              {Object.keys(questionsData).map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                </option>
-              ))}
-            </select>
           </div>
           <button
             onClick={handleStart}
@@ -244,7 +247,7 @@ const Game = () => {
 
           {showValidationMessage && (
             <div className="text-red-600 text-sm mt-4 animate__animated animate__shakeX">
-              Please enter your name and select a category to start the game.
+              Please enter your name to start the game.
             </div>
           )}
         </div>
@@ -252,15 +255,24 @@ const Game = () => {
 
       {gameState === 'playing' && currentQuestionIndex !== null && (
         <div className="mt-8 w-full max-w-xl bg-white p-8 rounded-lg shadow-xl text-center animate__animated animate__fadeIn">
-          <div className="mb-4 text-right text-gray-700 font-semibold animate__animated animate__fadeInUp">Time left: {timer} seconds</div>
-          <h3 className="text-2xl font-bold text-gray-800 mb-4 animate__animated animate__fadeIn">{currentQuestions[currentQuestionIndex].content}</h3>
+          <div className="mb-4 text-right text-gray-700 font-semibold animate__animated animate__bounceInRight">
+            Timer: {timer}
+          </div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-4 animate__animated animate__bounceInLeft">
+            Question {currentQuestionIndex + 1}
+          </h2>
+          <p className="text-lg text-gray-800 mb-6 animate__animated animate__bounceInRight">
+            {currentQuestions[currentQuestionIndex].content}
+          </p>
+
           {currentQuestions[currentQuestionIndex].options?.map((option) => (
             <button
               key={option}
               onClick={() => handleAnswer(option)}
               className={`mb-4 p-3 rounded-lg w-full text-left ${
                 selectedOption === option
-                  ? option.toLowerCase().trim() === currentQuestions[currentQuestionIndex].answer.toLowerCase().trim()
+                  ? option.toLowerCase().trim() ===
+                    currentQuestions[currentQuestionIndex].answer.toLowerCase().trim()
                     ? 'bg-green-500 text-white'
                     : 'bg-red-500 text-white'
                   : 'bg-gray-200 text-gray-800'
@@ -277,7 +289,7 @@ const Game = () => {
                 type="text"
                 value={userAnswer}
                 onChange={(e) => setUserAnswer(e.target.value)}
-                className="text-black border border-gray-300 p-3 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="text-black border border-gray-300 p-3 rounded mb-4 focus:outline-none "
               />
               <button
                 onClick={() => handleAnswer(userAnswer)}
@@ -291,27 +303,44 @@ const Game = () => {
           <div className="flex justify-between mt-6">
             <button
               onClick={handleChangeQuestion}
-              className={`bg-yellow-400 text-white px-4 py-2 rounded shadow hover:bg-yellow-500 transition duration-200 transform hover:scale-105 ml-5 ${!canChangeQuestion ? 'opacity-50 cursor-not-allowed' : ''} animate__animated animate__fadeIn`}
+              className={`bg-yellow-400 text-white px-4 py-2 rounded shadow hover:bg-yellow-500 transition duration-200 transform hover:scale-105 ml-5 ${
+                !canChangeQuestion ? 'opacity-50 cursor-not-allowed' : ''
+              } animate__animated animate__fadeIn`}
               disabled={!canChangeQuestion}
             >
               Change Question
             </button>
             <button
               onClick={handleHint}
-              className={`bg-purple-600 text-white px-4 py-2 rounded shadow hover:bg-purple-700 transition duration-200 transform hover:scale-105 ml-5 ${!canShowHint ? 'opacity-50 cursor-not-allowed' : ''} animate__animated animate__fadeIn`}
+              className={`bg-purple-600 text-white px-4 py-2 rounded shadow hover:bg-purple-700 transition duration-200 transform hover:scale-105 ml-5 ${
+                !canShowHint ? 'opacity-50 cursor-not-allowed' : ''
+              } animate__animated animate__fadeIn`}
               disabled={!canShowHint}
             >
               Show Hint
             </button>
           </div>
-          {showHint && <p className="mt-4 text-sm text-gray-700 animate__animated animate__fadeIn">{currentQuestions[currentQuestionIndex].hint}</p>}
+          {showHint && (
+            <p className="mt-4 text-sm text-gray-700 animate__animated animate__fadeIn">
+              {currentQuestions[currentQuestionIndex].hint}
+            </p>
+          )}
+
+          <div className="mt-8">
+            <p className="text-xl font-semibold text-gray-800">Score: {score}</p>
+            <p className="text-lg text-gray-600">Highest Score: {highestScore}</p>
+          </div>
         </div>
       )}
 
       {gameState === 'won' && (
         <div className="mt-8 w-full max-w-xl text-center bg-white p-8 rounded-lg shadow-xl animate__animated animate__fadeIn">
-          <h2 className="text-3xl font-bold mb-4 text-green-700 animate__animated animate__bounceIn">Congratulations!</h2>
-          <p className="text-lg text-gray-800 animate__animated animate__fadeIn">You have completed the game with a score of {score}.</p>
+          <h2 className="text-3xl font-bold mb-4 text-green-700 animate__animated animate__bounceIn">
+            Congratulations!
+          </h2>
+          <p className="text-lg text-gray-800 animate__animated animate__fadeIn">
+            You have completed the game with a score of {score}.
+          </p>
           <button
             onClick={handlePlayAgain}
             className="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700 transition duration-200 transform hover:scale-105 mt-4 animate__animated animate__bounceIn"
@@ -325,7 +354,9 @@ const Game = () => {
       {gameState === 'lost' && (
         <div className="mt-8 w-full max-w-xl text-center bg-white p-8 rounded-lg shadow-xl animate__animated animate__fadeIn">
           <h2 className="text-3xl font-bold mb-4 text-red-700 animate__animated animate__bounceIn">Game Over!</h2>
-          <p className="text-lg text-gray-800 animate__animated animate__fadeIn">You lost the game. Better luck next time!</p>
+          <p className="text-lg text-gray-800 animate__animated animate__fadeIn">
+            You lost the game. Better luck next time!
+          </p>
           <button
             onClick={handlePlayAgain}
             className="bg-red-600 text-white px-4 py-2 rounded shadow hover:bg-red-700 transition duration-200 transform hover:scale-105 mt-4 animate__animated animate__bounceIn"
