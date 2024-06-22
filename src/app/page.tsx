@@ -32,6 +32,9 @@ const Game = () => {
   const [canShowHint, setCanShowHint] = useState<boolean>(true);
   const [showHint, setShowHint] = useState<boolean>(false);
   const [showValidationMessage, setShowValidationMessage] = useState<boolean>(false);
+  const [hintPenalty, setHintPenalty] = useState<number>(2);
+const [changeQuestionPenalty, setChangeQuestionPenalty] = useState<number>(4);
+
 
   const isLocalStorageAvailable = (): boolean => {
     try {
@@ -70,37 +73,37 @@ const Game = () => {
       const interval = setInterval(() => {
         setTimer((prevTimer) => prevTimer - 1);
       }, 1000);
-  
+
       return () => clearInterval(interval);
     } else if (timer === 0) {
       setGameState('lost');
       handleGameOver(score); // Pass the current score to handleGameOver
     }
   }, [gameState, timer, score]);
-  
+
 
   const handleAnswer = (selected: string) => {
     if (gameState !== 'playing' || currentQuestionIndex === null) return;
-  
+
     const currentQuestion = currentQuestions[currentQuestionIndex];
     const correctAnswer = currentQuestion.answer.toLowerCase().trim();
     const userAnswerTrimmed = selected.toLowerCase().trim();
     const correct = userAnswerTrimmed === correctAnswer;
-  
+
     setSelectedOption(selected);
-  
+
     const timeTaken = 30 - timer;
     let timeScore = Math.max(0, 20 - 2 * timeTaken);
-  
+
     if (timeTaken > 20) {
       timeScore = 0;
     }
-  
+
     setTimeout(() => {
       if (correct) {
         const newScore = score + timeScore + 1;
         setScore(newScore);
-  
+
         if (currentQuestionIndex === currentQuestions.length - 1) {
           setGameState('won');
           handleGameOver(newScore); // Pass the final score
@@ -116,14 +119,14 @@ const Game = () => {
       setTimer(30);
     }, 1000);
   };
-  
+
 
   const handleStart = () => {
     if (!userName) {
       setShowValidationMessage(true);
       return;
     }
-  
+
     try {
       const shuffledQuestions = Object.values(questionsData).flat().sort(() => Math.random() - 0.5);
       setCurrentQuestions(shuffledQuestions);
@@ -139,11 +142,11 @@ const Game = () => {
     } catch (error) {
       console.error('Error starting the game:', error);
     }
-  
+
     // Pass initial score of 0 to handleGameOver
     handleGameOver(0);
   };
-  
+
 
   const handlePlayAgain = () => {
     setGameState('start');
@@ -166,16 +169,25 @@ const Game = () => {
       setUserAnswer('');
       setTimer(30);
       setCanChangeQuestion(false);
+  
+      // Deduct points for changing question
+      const newScore = Math.max(0, score - 4); // Deduct 4 points
+      setScore(newScore);
     }
   };
-
+  
   const handleHint = () => {
     if (canShowHint && currentQuestionIndex !== null) {
       setShowHint(true);
       setCanShowHint(false);
       setTimeout(() => setShowHint(false), 3000);
+  
+      // Deduct points for using hint
+      const newScore = Math.max(0, score - 2); // Deduct 2 points
+      setScore(newScore);
     }
   };
+  
 
   const handleGameOver = (finalScore: number) => {
     if (isLocalStorageAvailable()) {
@@ -191,15 +203,12 @@ const Game = () => {
       console.warn('localStorage is not available');
     }
   };
-  
-  
-  
 
   const renderLeaderboard = () => {
     if (leaderboard.length === 0) {
       return (
         <div className="mt-8 w-full max-w-xl">
-          <h2 className="text-3xl font-bold mb-4 text-blue-700">Leaderboard</h2>
+          <h2 className="text-3xl font-bold mb-4 text-[#a25fbf]">Leaderboard</h2>
           <p className="text-lg text-gray-800">No scores yet.</p>
         </div>
       );
@@ -207,7 +216,7 @@ const Game = () => {
 
     return (
       <div className="mt-8 w-full max-w-xl">
-        <h2 className="text-3xl font-bold mb-4 text-blue-700">Leaderboard</h2>
+        <h2 className="text-3xl font-bold mb-4 text-[#a25fbf]">Leaderboard</h2>
         <ul className="bg-white p-6 rounded-lg shadow-lg">
           {leaderboard.map((entry, index) => (
             <li
@@ -240,7 +249,7 @@ const Game = () => {
           </div>
           <button
             onClick={handleStart}
-            className="w-full bg-blue-600 text-white py-3 rounded shadow hover:bg-blue-700 transition duration-200 transform hover:scale-105 animate__animated animate__bounceInUp"
+            className="w-full bg-[#ff3835] text-white py-3 rounded shadow hover:bg-[#a25fbf] transition duration-200 transform hover:scale-105 animate__animated animate__bounceInUp"
           >
             Start Game
           </button>
@@ -283,7 +292,7 @@ const Game = () => {
             </button>
           ))}
 
-          {['fill', 'riddle'].includes(currentQuestions[currentQuestionIndex].type) && (
+          {['fill'].includes(currentQuestions[currentQuestionIndex].type) && (
             <div className="flex flex-col animate__animated animate__fadeIn">
               <input
                 type="text"
@@ -293,7 +302,7 @@ const Game = () => {
               />
               <button
                 onClick={() => handleAnswer(userAnswer)}
-                className="bg-blue-600 text-white px-4 py-3 rounded shadow hover:bg-blue-700 transition duration-200 transform hover:scale-105 animate__animated animate__fadeIn"
+                className="bg-[#ff3835] text-white px-4 py-3 rounded shadow hover:bg-[#a25fbf] transition duration-200 transform hover:scale-105 animate__animated animate__fadeIn"
               >
                 Submit
               </button>
@@ -301,24 +310,25 @@ const Game = () => {
           )}
 
           <div className="flex justify-between mt-6">
-            <button
-              onClick={handleChangeQuestion}
-              className={`bg-yellow-400 text-white px-4 py-2 rounded shadow hover:bg-yellow-500 transition duration-200 transform hover:scale-105 ml-5 ${
-                !canChangeQuestion ? 'opacity-50 cursor-not-allowed' : ''
-              } animate__animated animate__fadeIn`}
-              disabled={!canChangeQuestion}
-            >
-              Change Question
-            </button>
-            <button
-              onClick={handleHint}
-              className={`bg-purple-600 text-white px-4 py-2 rounded shadow hover:bg-purple-700 transition duration-200 transform hover:scale-105 ml-5 ${
-                !canShowHint ? 'opacity-50 cursor-not-allowed' : ''
-              } animate__animated animate__fadeIn`}
-              disabled={!canShowHint}
-            >
-              Show Hint
-            </button>
+          <button
+  onClick={handleChangeQuestion}
+  className={`bg-[#82b1ff] text-white px-4 py-2 rounded shadow hover:bg-[#5371a3] transition duration-200 transform hover:scale-105 ml-5 animate__animated animate__fadeIn ${
+    !canChangeQuestion ? 'opacity-50 cursor-not-allowed' : ''
+  }`}
+  disabled={!canChangeQuestion}
+>
+  Change Question (-4 points)
+</button>
+<button
+  onClick={handleHint}
+  className={`bg-[#145792] text-white px-4 py-2 rounded shadow hover:bg-[#638cff] transition duration-200 transform hover:scale-105 ml-5 animate__animated animate__fadeIn ${
+    !canShowHint ? 'opacity-50 cursor-not-allowed' : ''
+  }`}
+  disabled={!canShowHint}
+>
+  Show Hint (-2 points)
+</button>
+
           </div>
           {showHint && (
             <p className="mt-4 text-sm text-gray-700 animate__animated animate__fadeIn">
@@ -335,7 +345,7 @@ const Game = () => {
 
       {gameState === 'won' && (
         <div className="mt-8 w-full max-w-xl text-center bg-white p-8 rounded-lg shadow-xl animate__animated animate__fadeIn">
-          <h2 className="text-3xl font-bold mb-4 text-green-700 animate__animated animate__bounceIn">
+          <h2 className="text-3xl font-bold mb-4 text-[#007a6a] animate__animated animate__bounceIn">
             Congratulations!
           </h2>
           <p className="text-lg text-gray-800 animate__animated animate__fadeIn">
@@ -343,7 +353,7 @@ const Game = () => {
           </p>
           <button
             onClick={handlePlayAgain}
-            className="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700 transition duration-200 transform hover:scale-105 mt-4 animate__animated animate__bounceIn"
+            className="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-[#007a6a] transition duration-200 transform hover:scale-105 mt-4 animate__animated animate__bounceIn"
           >
             Play Again
           </button>
