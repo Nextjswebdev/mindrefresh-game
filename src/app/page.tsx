@@ -33,8 +33,7 @@ const Game = () => {
   const [showHint, setShowHint] = useState<boolean>(false);
   const [showValidationMessage, setShowValidationMessage] = useState<boolean>(false);
   const [hintPenalty, setHintPenalty] = useState<number>(2);
-const [changeQuestionPenalty, setChangeQuestionPenalty] = useState<number>(4);
-
+  const [changeQuestionPenalty, setChangeQuestionPenalty] = useState<number>(4);
 
   const isLocalStorageAvailable = (): boolean => {
     try {
@@ -81,7 +80,6 @@ const [changeQuestionPenalty, setChangeQuestionPenalty] = useState<number>(4);
     }
   }, [gameState, timer, score]);
 
-
   const handleAnswer = (selected: string) => {
     if (gameState !== 'playing' || currentQuestionIndex === null) return;
 
@@ -120,7 +118,6 @@ const [changeQuestionPenalty, setChangeQuestionPenalty] = useState<number>(4);
     }, 1000);
   };
 
-
   const handleStart = () => {
     if (!userName) {
       setShowValidationMessage(true);
@@ -147,7 +144,6 @@ const [changeQuestionPenalty, setChangeQuestionPenalty] = useState<number>(4);
     handleGameOver(0);
   };
 
-
   const handlePlayAgain = () => {
     setGameState('start');
     setUserName('');
@@ -169,25 +165,24 @@ const [changeQuestionPenalty, setChangeQuestionPenalty] = useState<number>(4);
       setUserAnswer('');
       setTimer(30);
       setCanChangeQuestion(false);
-  
+
       // Deduct points for changing question
       const newScore = Math.max(0, score - 4); // Deduct 4 points
       setScore(newScore);
     }
   };
-  
+
   const handleHint = () => {
     if (canShowHint && currentQuestionIndex !== null) {
       setShowHint(true);
       setCanShowHint(false);
       setTimeout(() => setShowHint(false), 3000);
-  
+
       // Deduct points for using hint
       const newScore = Math.max(0, score - 2); // Deduct 2 points
       setScore(newScore);
     }
   };
-  
 
   const handleGameOver = (finalScore: number) => {
     if (isLocalStorageAvailable()) {
@@ -234,7 +229,9 @@ const [changeQuestionPenalty, setChangeQuestionPenalty] = useState<number>(4);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-4">
-      <h1 className="xl:text-5xl text-3xl font-bold text-white mb-8 animate__animated animate__bounceIn">Fun Quizzes</h1>
+      {gameState === 'start' && (
+        <h1 className="xl:text-5xl text-3xl font-bold text-white mb-8 animate__animated animate__bounceIn">Fun Quizzes</h1>
+      )}
 
       {gameState === 'start' && (
         <div className="w-full max-w-xl bg-white p-8 rounded-lg shadow-xl animate__animated animate__fadeIn">
@@ -309,26 +306,25 @@ const [changeQuestionPenalty, setChangeQuestionPenalty] = useState<number>(4);
             </div>
           )}
 
-          <div className="flex justify-between mt-6">
-          <button
-  onClick={handleChangeQuestion}
-  className={`bg-[#82b1ff] text-white px-4 py-2 rounded shadow hover:bg-[#5371a3] transition duration-200 transform hover:scale-105 ml-5 animate__animated animate__fadeIn ${
-    !canChangeQuestion ? 'opacity-50 cursor-not-allowed' : ''
-  }`}
-  disabled={!canChangeQuestion}
->
-  Change Question (-4 points)
-</button>
-<button
-  onClick={handleHint}
-  className={`bg-[#145792] text-white px-4 py-2 rounded shadow hover:bg-[#638cff] transition duration-200 transform hover:scale-105 ml-5 animate__animated animate__fadeIn ${
-    !canShowHint ? 'opacity-50 cursor-not-allowed' : ''
-  }`}
-  disabled={!canShowHint}
->
-  Show Hint (-2 points)
-</button>
-
+          <div className="flex justify-between mt-6  gap-10">
+            <button
+              onClick={handleChangeQuestion}
+              className={`bg-[#82b1ff] text-white px-4 py-2 rounded shadow hover:bg-[#5371a3] transition duration-200 transform hover:scale-105 animate__animated animate__fadeIn ${
+                !canChangeQuestion ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+              disabled={!canChangeQuestion}
+            >
+              Change Question 
+            </button>
+            <button
+              onClick={handleHint}
+              className={`bg-[#82b1ff] text-white px-4 py-2 rounded shadow hover:bg-[#5371a3] transition duration-200 transform hover:scale-105 ml-5 animate__animated animate__fadeIn ${
+                !canShowHint ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+              disabled={!canShowHint}
+            >
+               Hint 
+            </button>
           </div>
           {showHint && (
             <p className="mt-4 text-sm text-gray-700 animate__animated animate__fadeIn">
