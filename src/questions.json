@@ -1,21 +1,392 @@
 {
-  "math": [
-    { "type": "mcq", "content": "What is 5 + 3?", "options": ["7", "8", "9"], "answer": "8", "hint": "Simple addition" },
-    { "type": "mcq", "content": "What is 10 - 4?", "options": ["5", "6", "7"], "answer": "6", "hint": "Basic subtraction" },
-    { "type": "mcq", "content": "What is 2 * 6?", "options": ["10", "12", "14"], "answer": "12", "hint": "Simple multiplication" },
-    { "type": "mcq", "content": "What is 15 / 3?", "options": ["3", "4", "5"], "answer": "5", "hint": "Basic division" },
-    { "type": "mcq", "content": "What is 7 squared?", "options": ["49", "50", "51"], "answer": "49", "hint": "Exponentiation" },
-    { "type": "mcq", "content": "What is the remainder of 10 divided by 3?", "options": ["1", "2", "3"], "answer": "1", "hint": "Modulo operation" },
-    { "type": "mcq", "content": "What is the square root of 16?", "options": ["3", "4", "5"], "answer": "4", "hint": "Square roots" },
-    { "type": "mcq", "content": "What is 3 to the power of 4?", "options": ["76", "81", "86"], "answer": "81", "hint": "Exponentiation" },
+  "questions": [
+    {
+      "type": "mcq",
+      "content": "What is the full form of API?",
+      "options": ["Application Programming Interface", "Advanced Programming Interface", "Automated Programming Interface"],
+      "answer": "Application Programming Interface",
+      "hint": "Technology and programming"
+    },
+    {
+      "type": "fill",
+      "content": "What is the result of 10 + 20?",
+      "answer": "30",
+      "hint": "Basic addition"
+    },
+    {
+      "type": "mcq",
+      "content": "What is the value of cos(0)?",
+      "options": ["0", "1", "-1"],
+      "answer": "1",
+      "hint": "Trigonometry"
+    },
+    {
+      "type": "mcq",
+      "content": "Who founded Sololearn?",
+      "options": ["David Blake", "Nikita Solovey", "Yeva Hyusyan"],
+      "answer": "Yeva Hyusyan",
+      "hint": "Founder of Sololearn"
+    },
+    {
+      "type": "mcq",
+      "content": "Which programming language is often used for beginners?",
+      "options": ["Python", "Java", "C++"],
+      "answer": "Python",
+      "hint": "Beginner-friendly language"
+    },
+    {
+      "type": "mcq",
+      "content": "What is the 5th Fibonacci number?",
+      "options": ["3", "5", "8"],
+      "answer": "5",
+      "hint": "Fibonacci sequence"
+    },
+    {
+      "type": "mcq",
+      "content": "Which number is prime?",
+      "options": ["12", "13", "14"],
+      "answer": "13",
+      "hint": "Prime number"
+    },
+    {
+      "type": "fill",
+      "content": "Calculate the total of 2 + 2 + 2 + 2 + 0 + 2 / 2",
+      "answer": "9",
+      "hint": "Basic arithmetic"
+    },
     
-    { "type": "fill", "content": "The result of 5 + 2 is ___", "answer": "7", "hint": "Basic arithmetic" },
-    { "type": "fill", "content": "If you have 10 apples and give away 3, how many apples do you have left?", "answer": "7", "hint": "Subtraction" },
-    { "type": "fill", "content": "What is 4 multiplied by 3?", "answer": "12", "hint": "Multiplication" },
-    { "type": "fill", "content": "If a pizza is divided into 8 slices and you eat 3, how many slices are left?", "answer": "5", "hint": "Division" },
-    { "type": "fill", "content": "What is the area of a square with side length 5?", "answer": "25", "hint": "Geometry" },
-    { "type": "fill", "content": "If you have 24 hours in a day, how many minutes is that?", "answer": "1440", "hint": "Time conversion" },
-    { "type": "fill", "content": "How many sides does a triangle have?", "answer": "3", "hint": "Geometry" },
-    { "type": "fill", "content": "What is the value of pi (π) rounded to two decimal places?", "answer": "3.14", "hint": "Mathematical constant" }
+    {
+      "type": "mcq",
+      "content": "Which is an operating system?",
+      "options": ["CPU", "RAM", "Windows"],
+      "answer": "Windows",
+      "hint": "Operating system"
+    },
+    {
+      "type": "mcq",
+      "content": "What does DSA stand for?",
+      "options": ["Data Storage Algorithm", "Digital System Analysis", "Data Structures and Algorithms"],
+      "answer": "Data Structures and Algorithms",
+      "hint": "Computer science"
+    },
+    {
+      "type": "mcq",
+      "content": "What is HTML used for?",
+      "options": ["Styling web pages", "Creating dynamic content", "Structuring web pages"],
+      "answer": "Structuring web pages",
+      "hint": "Web development"
+    },
+    {
+      "type": "mcq",
+      "content": "What does 'print()' function do in Python?",
+      "options": ["Reads user input", "Displays output", "Calculates arithmetic"],
+      "answer": "Displays output",
+      "hint": "Basic Python"
+    },
+    {
+      "type": "mcq",
+      "content": "What is the factorial of 5?",
+      "options": ["10", "20", "120"],
+      "answer": "120",
+      "hint": "Factorial calculation"
+    },
+    {
+      "type": "mcq",
+      "content": "Who sent the first email?",
+      "options": ["Bill Gates", "Ray Tomlinson", "Tim Berners-Lee"],
+      "answer": "Ray Tomlinson",
+      "hint": "Internet history"
+    },
+    {
+      "type": "mcq",
+      "content": "Which programming language is commonly used by hackers?",
+      "options": ["Java", "Python", "C++"],
+      "answer": "Python",
+      "hint": "Hacking community preference"
+    },
+    {
+      "type": "mcq",
+      "content": "Which one is not a styling language?",
+      "options": ["CSS", "Tailwind CSS", "Next.js"],
+      "answer": "Next.js",
+      "hint": "Web development frameworks"
+    },
+    {
+      "type": "mcq",
+      "content": "What are the first two digits after π (pi)?",
+      "options": ["3.14", "3.16", "3.18"],
+      "answer": "3.14",
+      "hint": "Mathematical constant"
+    },
+    {
+      "type": "fill",
+      "content": "I speak without a mouth and hear without ears. I have no body, but I come alive with wind. What am I?",
+      "answer": "echo",
+      "hint": "Riddle"
+    },
+    {
+      "type": "mcq",
+      "content": "What does AI stand for?",
+      "options": ["Artificial Intelligence", "Advanced Intelligence", "Automated Intelligence"],
+      "answer": "Artificial Intelligence",
+      "hint": "Technology and science"
+    },
+    {
+      "type": "mcq",
+      "content": "What is the main goal of data science?",
+      "options": ["To predict future events", "To analyze historical data", "To visualize data"],
+      "answer": "To predict future events",
+      "hint": "Analytics and statistics"
+    },
+    {
+      "type": "mcq",
+      "content": "What is the full form of RAM?",
+      "options": ["Random Access Memory", "Read Access Memory", "Rapid Access Memory"],
+      "answer": "Random Access Memory",
+      "hint": "Computer memory"
+    },
+    {
+      "type": "fill",
+      "content": "What is 16 in binary?",
+      "answer": "10000",
+      "hint": "Binary conversion"
+    },
+    {
+      "type": "mcq",
+      "content": "What is the value of sin(90°)?",
+      "options": ["0", "1", "-1"],
+      "answer": "1",
+      "hint": "Trigonometry"
+    },
+    {
+      "type": "mcq",
+      "content": "Who is the CEO of Microsoft?",
+      "options": ["Satya Nadella", "Bill Gates", "Steve Jobs"],
+      "answer": "Satya Nadella",
+      "hint": "Current tech leaders"
+    },
+    {
+      "type": "mcq",
+      "content": "Which programming language is known for its use in statistical computing and data analysis?",
+      "options": ["Java", "R", "Swift"],
+      "answer": "R",
+      "hint": "Data analysis"
+    },
+    {
+      "type": "mcq",
+      "content": "What is the 7th Fibonacci number?",
+      "options": ["8", "13", "21"],
+      "answer": "13",
+      "hint": "Fibonacci sequence"
+    },
+    {
+      "type": "mcq",
+      "content": "Which number is NOT prime?",
+      "options": ["17", "21", "23"],
+      "answer": "21",
+      "hint": "Prime number"
+    },
+    {
+      "type": "fill",
+      "content": "Calculate 3 * 4 - 2.",
+      "answer": "10",
+      "hint": "Basic arithmetic"
+    },
+    {
+      "type": "mcq",
+      "content": "Which operating system is developed by Apple Inc.?",
+      "options": ["Windows", "Linux", "macOS"],
+      "answer": "macOS",
+      "hint": "Apple's OS"
+    },
+    {
+      "type": "mcq",
+      "content": "What does SEO stand for?",
+      "options": ["Search Engine Optimization", "Software Engineering Office", "System Efficiency Optimization"],
+      "answer": "Search Engine Optimization",
+      "hint": "Web development"
+    },
+    {
+      "type": "mcq",
+      "content": "Which planet is known as the Red Planet?",
+      "options": ["Mars", "Venus", "Jupiter"],
+      "answer": "Mars",
+      "hint": "Astronomy"
+    },
+    {
+      "type": "mcq",
+      "content": "What does CSS stand for?",
+      "options": ["Cascading Style Sheets", "Computer Style Sheets", "Creative Style Sheets"],
+      "answer": "Cascading Style Sheets",
+      "hint": "Web development"
+    },
+    {
+      "type": "fill",
+      "content": "What is 5 multiplied by 3?",
+      "answer": "15",
+      "hint": "Basic arithmetic"
+    },
+    {
+      "type": "mcq",
+      "content": "Who created Python programming language?",
+      "options": ["Guido van Rossum", "James Gosling", "Bjarne Stroustrup"],
+      "answer": "Guido van Rossum",
+      "hint": "Programming"
+    },
+    {
+      "type": "mcq",
+      "content": "What is the full form of HTML?",
+      "options": ["Hyper Text Markup Language", "High Text Markup Language", "Hyperlinks and Text Markup Language"],
+      "answer": "Hyper Text Markup Language",
+      "hint": "Web development"
+    },
+    {
+      "type": "mcq",
+      "content": "Which of the following is NOT a type of database management system (DBMS)?",
+      "options": ["MySQL", "MongoDB", "React.js"],
+      "answer": "React.js",
+      "hint": "Database systems"
+    },
+    
+    {
+      "type": "fill",
+      "content": "What is the process of finding errors and fixing them in a program?",
+      "answer": "debugging",
+      "hint": "Programming"
+    },
+    {
+      "type": "mcq",
+      "content": "Which planet is closest to the Sun?",
+      "options": ["Venus", "Mercury", "Earth"],
+      "answer": "Mercury",
+      "hint": "Astronomy"
+    },
+    {
+      "type": "mcq",
+      "content": "What does CSS do in web development?",
+      "options": ["Defines the structure of web pages", "Controls the presentation and style", "Manages server-side logic"],
+      "answer": "Controls the presentation and style",
+      "hint": "Web development"
+    },
+    {
+      "type": "fill",
+      "content": "What is the result of 4 multiplied by 5?",
+      "answer": "20",
+      "hint": "Basic arithmetic"
+    },
+    {
+      "type": "mcq",
+      "content": "Who invented the World Wide Web?",
+      "options": ["Tim Berners-Lee", "Bill Gates", "Mark Zuckerberg"],
+      "answer": "Tim Berners-Lee",
+      "hint": "Internet history"
+    },
+    {
+      "type": "mcq",
+      "content": "What is the chemical symbol for water?",
+      "options": ["H2O", "CO2", "NaCl"],
+      "answer": "H2O",
+      "hint": "Chemistry"
+    },
+    {
+      "type": "mcq",
+      "content": "What is the result of 10 divided by 2 plus 3?",
+      "options": ["5", "8", "10"],
+      "answer": "8",
+      "hint": "Basic arithmetic"
+    },
+    {
+      "type": "mcq",
+      "content": "Which planet has the Great Red Spot?",
+      "options": ["Mars", "Jupiter", "Saturn"],
+      "answer": "Jupiter",
+      "hint": "Astronomy"
+    },
+    {
+      "type": "fill",
+      "content": "What is the opposite of 'true' in Boolean logic?",
+      "answer": "false",
+      "hint": "Programming"
+    },
+    {
+      "type": "mcq",
+      "content": "Who is the co-founder of Google?",
+      "options": ["Larry Page", "Mark Zuckerberg", "Jeff Bezos"],
+      "answer": "Larry Page",
+      "hint": "Technology and internet"
+    },
+    {
+      "type": "mcq",
+      "content": "Which college did Mark Zuckerberg attend when he created Facebook?",
+      "options": ["Harvard University", "Stanford University", "MIT"],
+      "answer": "Harvard University",
+      "hint": "Social media history"
+    },
+    {
+      "type": "mcq",
+      "content": "Who is the founder of Amazon?",
+      "options": ["Jeff Bezos", "Bill Gates", "Elon Musk"],
+      "answer": "Jeff Bezos",
+      "hint": "E-commerce"
+    },
+    {
+      "type": "mcq",
+      "content": "What was the original name of Twitter?",
+      "options": ["Twttr", "TweetBox", "Twinkle"],
+      "answer": "Twttr",
+      "hint": "Social media"
+    },
+    {
+      "type": "mcq",
+      "content": "In which year was Netflix founded?",
+      "options": ["1997", "2000", "1998"],
+      "answer": "1997",
+      "hint": "Streaming services"
+    },
+    {
+      "type": "mcq",
+      "content": "Who were the creators of YouTube?",
+      "options": ["Steve Chen, Chad Hurley, Jawed Karim", "Larry Page, Sergey Brin", "Mark Zuckerberg, Eduardo Saverin"],
+      "answer": "Steve Chen, Chad Hurley, Jawed Karim",
+      "hint": "Video sharing"
+    },
+    {
+      "type": "mcq",
+      "content": "When was Instagram launched?",
+      "options": ["2010", "2012", "2011"],
+      "answer": "2010",
+      "hint": "Photo sharing"
+    },
+    {
+      "type": "mcq",
+      "content": "Who founded LinkedIn?",
+      "options": ["Reid Hoffman", "Jack Dorsey", "Evan Williams"],
+      "answer": "Reid Hoffman",
+      "hint": "Professional networking"
+    },
+    {
+      "type": "mcq",
+      "content": "What is the slogan of Reddit?",
+      "options": ["The front page of the internet", "Explore the world", "Social news, social fun"],
+      "answer": "The front page of the internet",
+      "hint": "Online communities"
+    },
+    {
+      "type": "mcq",
+      "content": "Who founded WhatsApp?",
+      "options": ["Jan Koum, Brian Acton", "Mark Zuckerberg", "Jack Dorsey"],
+      "answer": "Jan Koum, Brian Acton",
+      "hint": "Messaging app"
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
   ]
 }

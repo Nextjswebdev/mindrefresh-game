@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import questionsData from '../questions.json';
@@ -80,6 +80,32 @@ const Game = () => {
     }
   }, [gameState, timer, score]);
 
+  useEffect(() => {
+    if (gameState === 'start') {
+      // Reset game state when starting a new game
+      setUserName('');
+      setCurrentQuestions([]);
+      setCurrentQuestionIndex(null);
+      setScore(0);
+      setSelectedOption(null);
+      setUserAnswer('');
+      setTimer(30);
+      setCanChangeQuestion(true);
+      setCanShowHint(true);
+      setShowHint(false);
+    }
+  }, [gameState]);
+
+  const shuffleOptions = (options: string[]): string[] => {
+    // Shuffle options by swapping each element with a random one
+    const shuffledOptions = [...options];
+    for (let i = shuffledOptions.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
+    }
+    return shuffledOptions;
+  };
+
   const handleAnswer = (selected: string) => {
     if (gameState !== 'playing' || currentQuestionIndex === null) return;
 
@@ -125,8 +151,12 @@ const Game = () => {
     }
 
     try {
-      const shuffledQuestions = Object.values(questionsData).flat().sort(() => Math.random() - 0.5);
-      setCurrentQuestions(shuffledQuestions);
+      const shuffledQuestions = Object.values(questionsData).flat().sort(() => Math.random() - 0.5).slice(0, 10);
+      const questionsWithShuffledOptions = shuffledQuestions.map((question) => ({
+        ...question,
+        options: shuffleOptions(question.options || []),
+      }));
+      setCurrentQuestions(questionsWithShuffledOptions);
       setShowValidationMessage(false);
       setGameState('playing');
       setCurrentQuestionIndex(0);
@@ -146,15 +176,6 @@ const Game = () => {
 
   const handlePlayAgain = () => {
     setGameState('start');
-    setUserName('');
-    setScore(0);
-    setCurrentQuestionIndex(null);
-    setSelectedOption(null);
-    setUserAnswer('');
-    setTimer(30);
-    setCanChangeQuestion(true);
-    setCanShowHint(true);
-    setShowHint(false);
   };
 
   const handleChangeQuestion = () => {
@@ -314,7 +335,7 @@ const Game = () => {
               }`}
               disabled={!canChangeQuestion}
             >
-              Change Question 
+              Change Question
             </button>
             <button
               onClick={handleHint}
@@ -323,7 +344,7 @@ const Game = () => {
               }`}
               disabled={!canShowHint}
             >
-               Hint 
+              Hint
             </button>
           </div>
           {showHint && (
